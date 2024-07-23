@@ -157,13 +157,13 @@ SL_CustomPrefs.Get = function()
 		},
       	-- - - - - - - - - - - - - - - - - - - -
 		EnableGrooveStats = {
-			Default = false,
+			Default = true,
 			Choices =  { THEME:GetString("ThemePrefs","Yes"), THEME:GetString("ThemePrefs", "No") },
 			Values  = { true, false }
 		},
 
 		AutoDownloadUnlocks = {
-			Default = false,
+			Default = true,
 			Choices =  { THEME:GetString("ThemePrefs","Yes"), THEME:GetString("ThemePrefs", "No") },
 			Values  = { true, false }
 		},
