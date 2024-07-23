@@ -2,115 +2,184 @@
 -- Returns an actor that can write a request, wait for its response, and then
 -- perform some action. This actor will only wait for one response at a time.
 -- If we make a new request while we are already waiting on a response, we
--- will ignore the response received from the previous request and wait for the
--- new response. 
+-- will cancel the current request and make a new one.
+--
+-- Args:
+--     x: The x position of the loading spinner.
+--     y: The y position of the loading spinner.
 --
 -- Usage:
--- af[#af+1] = RequestResponseActor("GetScores", 10)
+-- af[#af+1] = RequestResponseActor(100, 0)
 --
--- Which can then be triggered by:
+-- Which can then be triggered from within the OnCommand of the parent ActorFrame:
 --
--- af[#af+1] = Def.Actor{
---   OnCommand=function(self)
---     MESSAGEMAN:Broadcast("GetScores", {
---       data={..},
---       args={..},
---       callback=function(data, args)
---         SCREENMAN:SystemMessage(tostring(data)..tostring(args))
---       end
+-- af.OnCommand=function(self)
+--     self:playcommand("MakeGrooveStatsRequest", {
+--         endpoint="new-session.php?chartHashVersion="..SL.GrooveStats.ChartHashVersion,
+--         method="GET",
+--         timeout=10,
+--         callback=NewSessionRequestProcessor,
+--         args=self:GetParent()
 --     })
---   end
---  }
--- (The OnCommand can be concatenated to the returned actor itself.)
+-- end
+--
+-- (Alternatively, the OnCommand can be concatenated to the returned actor itself.)
 
--- The params in the MESSAGEMAN:Broadcast() call must have the following:
--- data: A table that can be converted to JSON that will contains the
---       information for the request
--- args: Arguments that will be made accesible to the callback function. This
+-- The params table passed to the playcommand can have the following keys.
+-- All these fields are optional because there are some defaults in place.
+--
+-- endpoint: string, the endpoint at api.groovestats.com to send the request to.
+-- method: string, the type of request to make.
+--	       Valid values are GET, POST, PUT, PATCH, and DELETE.
+-- body: string, the body for the request.
+-- headers: table, a table containing key value pairs for the headers of the request.
+-- timeout: number, the amount of time to wait for the request to complete in seconds.
+-- callback: function, callback to process the response. It can take up to two
+--       parameters:
+--           res: The JSON response which has been converted back to a lua table
+--           args: The provided args passed as is.
+-- args: any, arguments that will be made accesible to the callback function. This
 --       can of any type as long as the callback knows what to do with it.
--- callback: A function that processes the response. It must take at least two
---           parameters:	
---              data: The JSON response which has been converted back to a lua table
---              args: The same args as listed above above.
+RequestResponseActor = function(x, y)
+    local url_prefix = "https://api.groovestats.com/"
 
--- name: A name that will trigger the request for this actor.
---       It should generally be unique for each actor of this type.
--- timeout: A positive number in seconds between [1.0, 59.0] inclusive. It must
---          be less than 60 seconds as responses are expected to be cleaned up
---          by the launcher by then.
-RequestResponseActor = function(name, timeout)
-    -- Sanitize the timeout value.
-    local timeout = clamp(timeout, 1.0, 59.0)
-    local path_prefix = "/Save/GrooveStats/"
-
-    return Def.Actor{
+    return Def.ActorFrame{
         InitCommand=function(self)
-            self.request_id = nil
-            self.request_time = nil
-            self.args = nil
-            self.callback = nil
+            self.request_id = -1
+            self.request_time = -1
+            self.request_handler = nil
+            self.leaving_screen = false
+            self:xy(x, y)
         end,
-        WaitCommand=function(self)
-            local Reset = function(self)
-                self.request_id = nil
-                self.request_time = nil
-                self.args = nil
-                self.callback = nil
-            end
-            -- We're waiting on a response.
-            if self.request_id ~= nil then
-                local now = GetTimeSinceStart()
+        CancelCommand=function(self)
+			self.leaving_screen = true
+			-- Cancel the request if we pressed back on the screen.
+			if self.request_handler then
+				self.request_handler:Cancel()
+				self.request_handler = nil
+			end
+		end,
+		OffCommand=function(self)
+			self.leaving_screen = true
+			-- Cancel the request if this actor will be destructed soon.
+			if self.request_handler then
+				self.request_handler:Cancel()
+				self.request_handler = nil
+			end
+		end,
+		MakeGrooveStatsRequestCommand=function(self, params)
+			self:stoptweening()
+			if not params then
+				Warn("No params specified for MakeGrooveStatsRequestCommand.")
+				return
+			end
 
-                local f = RageFileUtil.CreateRageFile()
-                -- Check to see if the response file was written.
-                if f:Open(path_prefix.."responses/"..self.request_id..".json", 1) then
-                    local json_str = f:Read()
-					local data = {}
-					if #json_str ~= 0 then
-						data = json.decode(json_str)
+			-- Cancel any existing requests if we're waiting on one at the moment.
+			if self.request_handler then
+				self.request_handler:Cancel()
+				self.request_handler = nil
+			end
+			self:GetChild("Spinner"):visible(true)
+
+			local timeout = params.timeout or 60
+			local endpoint = params.endpoint or ""
+			local method = params.method
+			local body = params.body
+			local headers = params.headers
+
+			self.timeout = timeout
+
+			-- Attempt to make the request
+			self.request_handler = NETWORK:HttpRequest{
+				url=url_prefix..endpoint,
+				method=method,
+				body=body,
+				headers=headers,
+				connectTimeout=timeout/2,
+				transferTimeout=timeout/2,
+				onResponse=function(response)
+					self.request_handler = nil
+					-- If we get a permanent error, make sure we "disconnect" from
+					-- GrooveStats until we recheck on ScreenTitleMenu.
+					if response.statusCode then
+						local body = nil
+						local code = response.statusCode
+						if code == 200 then
+							body = JsonDecode(response.body)
+						end
+						if (code >= 400 and code < 499 and code ~= 429) or (code == 200 and body and body.error and #body.error) then
+							SL.GrooveStats.IsConnected = false
+						end
 					end
-                    self.callback(data, self.args)
-                    f:Close()
-                    Reset(self)
-                -- Have we timed out?
-                elseif now - self.request_time > timeout then
-                    self.callback(nil, self.args)
-                    Reset(self)
-                end
-                f:destroy()
-            end
 
-            -- If the id wasn't reset, then we're still waiting. Loop again.
-            if self.request_id ~= nil then
-                self:sleep(0.5):queuecommand('Wait')
-            end
-        end,
-        [name .. "MessageCommand"]=function(self, params)
-            if not SL.GrooveStats.Launcher and params.data["action"] ~= "ping" then return end
-            local id = nil
-            -- We don't want to generate a bunch of files if they will never get processed.
-            -- Specifically for the ping action, we will use a predetermined id.
-            if params.data["action"] == "ping" then
-                id = "ping"
-            else
-                id = CRYPTMAN:GenerateRandomUUID()
-            end
+					if self.leaving_screen then
+						return
+					end
+					
+					if params.callback then
+						if not response.error or ToEnumShortString(response.error) ~= "Cancelled" then
+							params.callback(response, params.args)
+						end
+					end
 
-            local f = RageFileUtil:CreateRageFile()
-            if f:Open(path_prefix .. "requests/".. id .. ".json", 2) then
-                f:Write(json.encode(params.data))
-                f:Close()
+					self:GetChild("Spinner"):visible(false)
+				end,
+			}
+			-- Keep track of when we started making the request
+			self.request_time = GetTimeSinceStart()
+			-- Start looping for the spinner.
+			self:queuecommand("GrooveStatsRequestLoop")
+		end,
+		GrooveStatsRequestLoopCommand=function(self)
+			local now = GetTimeSinceStart()
+			local remaining_time = self.timeout - (now - self.request_time)
+			self:playcommand("UpdateSpinner", {
+				timeout=self.timeout,
+				remaining_time=remaining_time
+			})
+			-- Only loop if the request is still ongoing.
+			-- The callback always resets the request_handler once its finished.
+			if self.request_handler then
+				self:sleep(0.5):queuecommand("GrooveStatsRequestLoop")
+			end
+		end,
 
-				self:stoptweening()
-                self.request_id = id
-                self.request_time = GetTimeSinceStart()
-                self.args = params.args
-                self.callback = params.callback
-                self:sleep(0.1):queuecommand('Wait')
-            end
-            f:destroy()
-        end
-    }
+		Def.ActorFrame{
+			Name="Spinner",
+			InitCommand=function(self)
+				self:visible(false)
+			end,
+			Def.Sprite{
+				Texture=THEME:GetPathG("", "LoadingSpinner 10x3.png"),
+				Frames=Sprite.LinearFrames(30,1),
+				InitCommand=function(self)
+					self:zoom(0.15)
+					self:diffuse(GetHexColor(SL.Global.ActiveColorIndex, true))
+				end,
+				VisualStyleSelectedMessageCommand=function(self)
+					self:diffuse(GetHexColor(SL.Global.ActiveColorIndex, true))
+				end
+			},
+			LoadFont("Common Normal")..{
+				InitCommand=function(self)
+					self:zoom(0.9)
+					-- Leaderboard should be white since it's on a black background.
+					self:diffuse(DarkUI() and name ~= "Leaderboard" and Color.Black or Color.White)
+				end,
+				UpdateSpinnerCommand=function(self, params)
+					-- Only display the countdown after we've waiting for some amount of time.
+					if params.timeout - params.remaining_time > 2 then
+						self:visible(true)
+					else
+						self:visible(false)
+					end
+					if params.remaining_time > 1 then
+						self:settext(math.floor(params.remaining_time))
+					end
+				end
+			}
+		},
+	}
 end
 
 -- -----------------------------------------------------------------------
@@ -169,12 +238,16 @@ end
 -- -----------------------------------------------------------------------
 -- The common conditions required to use the GrooveStats services.
 -- Currently the conditions are:
+--  - GrooveStats is enabled in the operator menu.
+--  - We were successfully able to make a GrooveStats conenction previously.
 --  - We must be in the "dance" game mode (not "pump", etc)
 --  - We must be in either ITG or FA+ mode. -- does not apply here.
 --  - At least one Api Key must be available (this condition may be relaxed in the future)
 --  - We must not be in course mode.
 IsServiceAllowed = function(condition)
     return (condition and
+        ThemePrefs.Get("EnableGrooveStats") and
+        SL.GrooveStats.IsConnected and 
         GAMESTATE:GetCurrentGame():GetName()=="dance" and
         (SL.P1.ApiKey ~= "" or SL.P2.ApiKey ~= "") and
         not GAMESTATE:IsCourseMode())
@@ -190,177 +263,6 @@ end
 -- malicious users out of GrooveStats. It is intended to prevent
 -- well-intentioned-but-unaware players from accidentally submitting
 -- invalid scores to GrooveStats.
-
---- NOTE: This function is the original for Simply Love
---- Below is the modified version with relevant checks for this theme
-ValidForGrooveStats_SL = function(player)
-    local valid = {}
-
-    -- ------------------------------------------
-    -- First, check for modes not supported by GrooveStats.
-
-    -- GrooveStats only supports dance for now (not pump, techno, etc.)
-    valid[1] = GAMESTATE:GetCurrentGame():GetName() == "dance"
-
-    -- GrooveStats does not support dance-solo (i.e. 6-panel dance like DDR Solo 4th Mix)
-    -- https://en.wikipedia.org/wiki/Dance_Dance_Revolution_Solo
-    valid[2] = GAMESTATE:GetCurrentStyle():GetName() ~= "solo"
-
-    -- GrooveStats actually does rank Marathons from ITG1, ITG2, and ITG Home
-    -- but there isn't QR support at this time.
-    valid[3] = not GAMESTATE:IsCourseMode()
-
-    -- GrooveStats was made with ITG settings in mind.
-    -- FA+ is okay because it just halves ITG's TimingWindowW1 but keeps everything else the same.
-    -- Casual (and Experimental, Demonic, etc.) uses different settings
-    -- that are incompatible with GrooveStats ranking.
-    valid[4] = (SL.Global.GameMode == "ITG" or SL.Global.GameMode == "FA+")
-
-    -- ------------------------------------------
-    -- Next, check global Preferences that would invalidate the score.
-
-    -- TimingWindowScale and LifeDifficultyScale are a little confusing. Players can change these under
-    -- Advanced Options in the operator menu on scales from [1 to Justice] and [1 to 7], respectively.
-    --
-    -- The OptionRow for TimingWindowScale offers [1, 2, 3, 4, 5, 6, 7, 8, Justice] as options
-    -- and these map to [1.5, 1.33, 1.16, 1, 0.84, 0.66, 0.5, 0.33, 0.2] in Preferences.ini for internal use.
-    --
-    -- The OptionRow for LifeDifficultyScale offers [1, 2, 3, 4, 5, 6, 7] as options
-    -- and these map to [1.6, 1.4, 1.2, 1, 0.8, 0.6, 0.4] in Preferences.ini for internal use.
-    --
-    -- I don't know the history here, but I suspect these preferences are holdovers from SM3.9 when
-    -- themes were just visual skins and core mechanics like TimingWindows and Life scaling could only
-    -- be handled by the SM engine.  Whatever the case, they're still exposed as options in the
-    -- operator menu and players still play around with them, so we need to handle that here.
-    --
-    -- 4 (1, internally) is considered standard for ITG.
-    -- GrooveStats expects players to have both these set to 4 (1, internally).
-    --
-    -- People can probably use some combination of LifeDifficultyScale,
-    -- TimingWindowScale, and TimingWindowAdd to probably match up with ITG's windows, but that's a
-    -- bit cumbersome to handle so just requre TimingWindowScale and LifeDifficultyScale these to be set
-    -- to 4.
-    valid[5] = PREFSMAN:GetPreference("TimingWindowScale") == 1
-    valid[6] = PREFSMAN:GetPreference("LifeDifficultyScale") == 1
-
-    -- Validate all other metrics.
-    local ExpectedTWA = 0.0015
-    local ExpectedWindows = {
-        0.021500 + ExpectedTWA,  -- Fantastics
-        0.043000 + ExpectedTWA,  -- Excellents
-        0.102000 + ExpectedTWA,  -- Greats
-        0.135000 + ExpectedTWA,  -- Decents
-        0.180000 + ExpectedTWA,  -- Way Offs
-        0.320000 + ExpectedTWA,  -- Holds
-        0.070000 + ExpectedTWA,  -- Mines
-        0.350000 + ExpectedTWA,  -- Rolls
-    }
-    local TimingWindows = { "W1", "W2", "W3", "W4", "W5", "Hold", "Mine", "Roll" }
-    local ExpectedLife = {
-         0.008,  -- Fantastics
-         0.008,  -- Excellents
-         0.004,  -- Greats
-         0.000,  -- Decents
-        -0.050,  -- Way Offs
-        -0.100,  -- Miss
-        -0.080,  -- Let Go
-         0.008,  -- Held
-        -0.050,  -- Hit Mine
-    }
-    local LifeWindows = { "W1", "W2", "W3", "W4", "W5", "Miss", "LetGo", "Held", "HitMine" }
-
-    -- Originally verify the ComboToRegainLife metrics.
-    valid[7] = (PREFSMAN:GetPreference("RegenComboAfterMiss") == 5 and PREFSMAN:GetPreference("MaxRegenComboAfterMiss") == 10)
-
-    local FloatEquals = function(a, b)
-        return math.abs(a-b) < 0.0001
-    end
-
-    -- And then verify the windows themselves.
-    local TWA = PREFSMAN:GetPreference("TimingWindowAdd")
-    if SL.Global.GameMode == "ITG" then
-        for i, window in ipairs(TimingWindows) do
-            -- Only check if the Timing Window is actually "enabled".
-            if i > 5 or SL.Global.ActiveModifiers.TimingWindows[i] then
-                valid[7] = valid[7] and FloatEquals(PREFSMAN:GetPreference("TimingWindowSeconds"..window) + TWA, ExpectedWindows[i])
-            end
-        end
-
-        for i, window in ipairs(LifeWindows) do
-            valid[7] = valid[7] and FloatEquals(THEME:GetMetric("LifeMeterBar", "LifePercentChange"..window), ExpectedLife[i])
-        end
-    elseif SL.Global.GameMode == "FA+" then
-        for i, window in ipairs(TimingWindows) do
-            -- This handles the "offset" for the FA+ window, while also retaining the correct indices for Holds/Mines/Rolls
-            -- i idx
-            -- 1  * - FA+ (idx doesn't matter as we explicitly handle the i == 1 case)
-            -- 2  1 - Fantastic
-            -- 3  2 - Excellent
-            -- 4  3 - Greats
-            -- 5  4 - Decents
-            -- 6  6 - Holds (notice how we skipped idx == 5, which would've been the Way Off window)
-            -- 7  7 - Mines
-            -- 8  8 - Rolls
-            -- Only check if the Timing Window is actually "enabled".
-            if i > 5 or SL.Global.ActiveModifiers.TimingWindows[i] then
-                local idx = (i < 6 and i-1 or i)
-                if i == 1 then
-                    -- For the FA+ fantastic, the first window can be anything as long as it's <= the actual fantastic window
-                    -- We could use FloatEquals here, but that's a 0.0001 margin of error for the equality case which I think 
-                    -- will be generally irrelevant.
-                    valid[7] = valid[7] and (PREFSMAN:GetPreference("TimingWindowSeconds"..window) + TWA <= ExpectedWindows[1])
-                else
-                    valid[7] = valid[7] and FloatEquals(PREFSMAN:GetPreference("TimingWindowSeconds"..window) + TWA, ExpectedWindows[idx])
-                end
-            end
-        end
-
-        for i, window in ipairs(LifeWindows) do
-            local idx = (i < 6 and i-1 or i)
-            if i == 1 then
-                valid[7] = valid[7] and FloatEquals(THEME:GetMetric("LifeMeterBar", "LifePercentChange"..window), ExpectedLife[1])
-            else
-                valid[7] = valid[7] and FloatEquals(THEME:GetMetric("LifeMeterBar", "LifePercentChange"..window), ExpectedLife[idx])
-            end
-        end
-    end
-
-
-    -- ------------------------------------------
-    -- Finally, check player-specific modifiers used during this song that would invalidate the score.
-
-    -- get playeroptions so we can check mods the player used
-    local po = GAMESTATE:GetPlayerState(player):GetPlayerOptions("ModsLevel_Preferred")
-
-
-    -- score is invalid if notes were removed
-    valid[8] = not (
-        po:Little()  or po:NoHolds() or po:NoStretch()
-        or po:NoHands() or po:NoJumps() or po:NoFakes()
-        or po:NoLifts() or po:NoQuads() or po:NoRolls()
-    )
-
-    -- score is invalid if notes were added
-    valid[9] = not (
-        po:Wide() or po:Skippy() or po:Quick()
-        or po:Echo() or po:BMRize() or po:Stomp()
-        or po:Big()
-    )
-
-    -- only FailTypes "Immediate" and "ImmediateContinue" are valid for GrooveStats
-    valid[10] = (po:FailSetting() == "FailType_Immediate" or po:FailSetting() == "FailType_ImmediateContinue")
-
-    -- ------------------------------------------
-    -- return the entire table so that we can let the player know which settings,
-    -- if any, prevented their score from being valid for GrooveStats
-
-    local allChecksValid = true
-    for _, passed_check in ipairs(valid) do
-        if not passed_check then allChecksValid = false break end
-    end
-
-    return valid, allChecksValid
-end
 
 ValidForGrooveStats = function(player)
     local valid = {}
@@ -509,6 +411,9 @@ ValidForGrooveStats = function(player)
     -- if autoplay was activated during the chart, invalidate
     valid[9] = not USEDAUTOPLAY[tonumber(player:sub(-1))]
 
+    local rate = SL.Global.ActiveModifiers.MusicRate * 100
+    valid[10] = 100 <= rate and rate <= 300
+
     -- ------------------------------------------
     -- return the entire table so that we can let the player know which settings,
     -- if any, prevented their score from being valid for GrooveStats
@@ -521,6 +426,86 @@ ValidForGrooveStats = function(player)
     return valid, allChecksValid
 end
 
+-- -----------------------------------------------------------------------
+
+CreateCommentString = function(player)
+	local pn = ToEnumShortString(player)
+	local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
+
+	local suffixes = {"w", "e", "g", "d", "wo"}
+
+	local comment = SL.Global.GameMode == "FA+" and "FA+" or ""
+
+	local rate = SL.Global.ActiveModifiers.MusicRate
+	if rate ~= 1 then
+		if #comment ~= 0 then
+			comment = comment .. ", "
+		end
+		comment = comment..("%gx Rate"):format(rate)
+	end
+
+	-- Ignore the top window in all cases.
+	for i=2, 6 do
+		local idx = SL.Global.GameMode == "FA+" and i-1 or i
+		local suffix = i == 6 and "m" or suffixes[idx]
+		local tns = i == 6 and "TapNoteScore_Miss" or "TapNoteScore_W"..i
+		
+		local number = pss:GetTapNoteScores(tns)
+
+		-- If the windows are disabled, then the number will be 0.
+		if number ~= 0 then
+			if #comment ~= 0 then
+				comment = comment .. ", "
+			end
+			comment = comment..number..suffix
+		end
+	end
+
+	local timingWindowOption = ""
+
+	if SL.Global.GameMode == "ITG" then
+		if not SL[pn].ActiveModifiers.TimingWindows[4] and not SL[pn].ActiveModifiers.TimingWindows[5] then
+			timingWindowOption = "No Dec/WO"
+		elseif not SL[pn].ActiveModifiers.TimingWindows[5] then
+			timingWindowOption = "No WO"
+		elseif not SL[pn].ActiveModifiers.TimingWindows[1] and not SL[pn].ActiveModifiers.TimingWindows[2] then
+			timingWindowOption = "No Fan/Exc"
+		end
+	elseif SL.Global.GameMode == "FA+" then
+		if not SL[pn].ActiveModifiers.TimingWindows[4] and not SL[pn].ActiveModifiers.TimingWindows[5] then
+			timingWindowOption = "No Gre/Dec/WO"
+		elseif not SL[pn].ActiveModifiers.TimingWindows[5] then
+			timingWindowOption = "No Dec/WO"
+		elseif not SL[pn].ActiveModifiers.TimingWindows[1] and not SL[pn].ActiveModifiers.TimingWindows[2] then
+			-- Weird flex but okay
+			timingWindowOption = "No Fan/WO"
+		else
+			-- Way Offs are always removed in FA+ mode.
+			timingWindowOption = "No WO"
+		end
+	end
+
+	if #timingWindowOption ~= 0 then
+		if #comment ~= 0 then
+			comment = comment .. ", "
+		end
+		comment = comment..timingWindowOption
+	end
+
+	local pn = ToEnumShortString(player)
+	-- If a player CModded, then add that as well.
+	local cmod = GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred"):CMod()
+	if cmod ~= nil then
+		if #comment ~= 0 then
+			comment = comment .. ", "
+		end
+		comment = comment.."C"..tostring(cmod)
+	end
+
+	return comment
+end
+
+-- -----------------------------------------------------------------------
 
 ParseGroovestatsDate = function(date)
 	if not date or #date == 0 then return "" end
@@ -544,4 +529,174 @@ ParseGroovestatsDate = function(date)
 	}
 
 	return monthMap[month].." "..tonumber(day)..", "..year
+end
+
+-- -----------------------------------------------------------------------
+LoadUnlocksCache = function()
+	local cache_file = "/Songs/unlocks-cache.json"
+	if FILEMAN:DoesFileExist(cache_file) then
+		local f = RageFileUtil:CreateRageFile()
+		local cache = {}
+		if f:Open(cache_file, 1) then
+			local data = JsonDecode(f:Read())
+			if data ~= nil then
+				cache = data
+			end
+		end
+		f:destroy()
+		return cache
+	end
+	return {}
+end
+
+-- -----------------------------------------------------------------------
+WriteUnlocksCache = function()
+	local cache_file = "/Songs/unlocks-cache.json"
+	local f = RageFileUtil:CreateRageFile()
+	if f:Open(cache_file, 2) then
+		f:Write(JsonEncode(SL.GrooveStats.UnlocksCache))
+	end
+	f:destroy()
+end
+
+-- -----------------------------------------------------------------------
+-- Downloads an Event unlock and unzips it. If a download with the same URL and
+-- destination pack name exists, the download attempt is skipped.
+-- 
+-- Args are:
+--   url: string, the file to download from the web.
+--   unlockName: string, an identifier for the download.
+--               Used to display on ScreenDownloads
+--   packName: string, The pack name to unlock the contents of the unlock to.
+DownloadEventUnlock = function(url, unlockName, packName)
+	-- Forward slash is not allowed in both Linux or Windows.
+	-- All others are not allowed in Windows.
+	local invalidChars = {
+			["/"]="",
+			["<"]="",
+			[">"]="",
+			[":"]="",
+			["\""]="",
+			["\\"]="",
+			["|"]="",
+			["?"]="",
+			["*"]=""
+	}
+	packName = string.gsub(packName, ".", invalidChars)
+
+	-- Reserved file names for Windows.
+	local invalidFilenames = {
+			["CON"]=true,
+			["PRN"]=true,
+			["AUX"]=true,
+			["NUL"]=true,
+			["COM1"]=true,
+			["COM2"]=true,
+			["COM3"]=true,
+			["COM4"]=true,
+			["COM5"]=true,
+			["COM6"]=true,
+			["COM7"]=true,
+			["COM8"]=true,
+			["COM9"]=true,
+			["LPT1"]=true,
+			["LPT2"]=true,
+			["LPT3"]=true,
+			["LPT4"]=true,
+			["LPT5"]=true,
+			["LPT6"]=true,
+			["LPT7"]=true,
+			["LPT8"]=true,
+			["LPT9"]=true
+	}
+	-- If the packName is invalid, just append a space to it so it's not.
+	if invalidFilenames[packName] then
+		packName = " "..packName.." "
+	end
+
+	-- Check the download cache to see if we have already downloaded this unlock
+	-- successfully to the intended location.
+	-- Unlocks are placed in the cache whenever unlocks are bot successfully
+	-- downloaded and zipped.
+	if SL.GrooveStats.UnlocksCache[url] and SL.GrooveStats.UnlocksCache[url][packName] then
+		return
+	end
+
+	-- Then check that the same download isn't already active in the Downloads
+	-- table.
+	for _, downloadInfo in pairs(SL.Downloads) do
+		if downloadInfo.Url == url and downloadInfo.Destination == packName then
+			return
+		end
+	end
+
+	local uuid = CRYPTMAN:GenerateRandomUUID()
+	local downloadfile = uuid..".zip"
+
+	SL.Downloads[uuid] = {
+		Name=unlockName,
+		Url=url,
+		Destination=packName,
+		CurrentBytes=0,
+		TotalBytes=0,
+		Complete=false
+	}
+
+	-- Create the request separately. If the host is blocked it's possible that
+	-- the SL.Downloads[uuid] table is assigned.
+	SL.Downloads[uuid].Request = NETWORK:HttpRequest{
+		url=url,
+		downloadFile=downloadfile,
+		onProgress=function(currentBytes, totalBytes)
+			local downloadInfo = SL.Downloads[uuid]
+			if downloadInfo == nil then return end
+
+			downloadInfo.CurrentBytes = currentBytes
+			downloadInfo.TotalBytes = totalBytes
+		end,
+		onResponse=function(response)
+			local downloadInfo = SL.Downloads[uuid]
+			if downloadInfo == nil then return end
+			
+			downloadInfo.Complete = true
+			if response.error ~= nil then
+				downloadInfo.ErrorMessage = response.errorMessage
+				return
+			end
+
+			if response.statusCode == 200 then
+				if response.headers["Content-Type"] == "application/zip" then
+					-- Downloads are usually of the form:
+					--    /Downloads/<name>.zip/<song_folders/
+					if not FILEMAN:Unzip("/Downloads/"..downloadfile, "/Songs/"..packName.."/") then
+						downloadInfo.ErrorMessage = "Failed to Unzip!"
+					else
+						if SL.GrooveStats.UnlocksCache[url] == nil then
+							SL.GrooveStats.UnlocksCache[url] = {}
+						end
+						SL.GrooveStats.UnlocksCache[url][packName] = true
+
+						WriteUnlocksCache()
+					end
+				else
+					downloadInfo.ErrorMessage = "Download is not a Zip!"
+					Warn("Attempted to download from \""..url.."\" which is not a zip!")
+				end
+			else
+				downloadInfo.ErrorMessage = "Network Error "..response.statusCode
+			end
+		end,
+	}
+end
+
+-- -----------------------------------------------------------------------
+-- Iterates over the RequestCache and removes those entries that are older
+-- than a certain amount of time.
+RemoveStaleCachedRequests = function()
+	local timeout = 1 * 60  -- One minute
+	for requestCacheKey, data in pairs(SL.GrooveStats.RequestCache) do
+		if GetTimeSinceStart() - data.Timestamp >= timeout then
+			SL.GrooveStats.RequestCache[requestCacheKey] = nil
+		end
+	end
 end

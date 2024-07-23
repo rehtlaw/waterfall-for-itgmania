@@ -165,7 +165,8 @@ for i=1, PROFILEMAN:GetNumLocalProfiles() do
 		mods = mods,
 		noteskin = noteskin,
 		judgment = judgment,
-		itg = itg
+		itg = itg,
+        guid = profile:GetGUID(),
 	}
 
 	table.insert(profile_data, data)
