@@ -4,15 +4,14 @@ local PlayerDefaults = {
 	__index = {
 		initialize = function(self)
 			self.ActiveModifiers = {
-				SpeedModType = "X",
-				SpeedMod = 1.00,
+				SpeedModType = "M",
+				SpeedMod = 250,
 				JudgmentGraphic = "Optimus Dark 1x7 (doubleres).png",
-				EarlyLate = "Enabled",
 				NoteSkin = nil,
 				Mini = "0%",
 				BackgroundFilter = "Off",
-				ScreenDarken = 0,
-				VisualDelay = "0ms",
+				ScreenDarken = 0.3,
+                VisualDelay = "0ms",
 				NoteFieldOffsetX = 0,
 				NoteFieldOffsetY = 0,
 
@@ -22,8 +21,8 @@ local PlayerDefaults = {
 				HideLifebar = false,
 				HideScore = false,
 				HideDanger = false,
-
-				ColumnFlashOnMiss = false,
+				
+				ColumnFlashOnMiss = true,
 				SubtractiveScoring = "string",
 				PacemakerText = "string",
 				SubtractiveExtra = false,
@@ -41,8 +40,8 @@ local PlayerDefaults = {
 				--MissBecauseHeld = false,
 				NPSGraphAtTop = false,
 				EXScoring = false,
-				ColumnCues = false,
-				ColumnCountdown = false,
+				ColumnCues = true,
+                ColumnCountdown = true,
 				OffsetDisplay = false,
 
 				-- New step stats stuff
@@ -52,9 +51,11 @@ local PlayerDefaults = {
 
 				-- waterfall/bistro options
 				SimulateITGEnv = false,
-				PreferredLifeBar = "Hard",
+				PreferredLifeBar = "Easy",
 				FAPlus = 0,
-				EarlyLateThreshold = "FA+",
+				EarlyLate = "Enabled",
+				EarlyLateColor="Judgment",
+				EarlyLateThreshold = "Top Judgment",
 
 				-- profile customization
 				ProfileCardInfo = "SongsPlayed",
@@ -62,7 +63,7 @@ local PlayerDefaults = {
 				PreferredGraph = "Life",
 				PreferredSecondGraph = "Life",
 				PreferredGameEnv = "Waterfall",
-				PreferredFaultWindow = 1,
+				PreferredFaultWindow = 2,
 				GSOverride = false,
                 AlwaysGS = false,
 				
