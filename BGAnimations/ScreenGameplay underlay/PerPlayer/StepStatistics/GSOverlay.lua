@@ -178,7 +178,7 @@ local af = Def.ActorFrame{
 		end
 	end,
 
-	RequestResponseActor("Leaderboard", loop_seconds, 0, 0)..{
+	RequestResponseActor(0, 0)..{
 		OnCommand=function(self)
 			self:queuecommand("MakeRequest")
 		end,

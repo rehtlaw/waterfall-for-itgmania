@@ -109,8 +109,20 @@ local GetGSName = function(gsEntry)
 	return ""
 end
 
-local GetScoresRequestProcessor = function(res, master)
-    if not master or not GAMESTATE:GetCurrentSong() or chartchanged then return end
+local GetScoresRequestProcessor = function(res, params)
+    local master = params.master
+    if master == nil then return end
+    if GAMESTATE:GetCurrentSong() == nil then return end
+
+    local data = res.statusCode == 200 and JsonDecode(res.body) or nil
+	local requestCacheKey = params.requestCacheKey
+	-- If we have data, and the requestCacheKey is not in the cache, cache it.
+	if data ~= nil and SL.GrooveStats.RequestCache[requestCacheKey] == nil then
+		SL.GrooveStats.RequestCache[requestCacheKey] = {
+			Response=res,
+			Timestamp=GetTimeSinceStart()
+		}
+	end
 
     local function processEntry(gsEntry, paneDisplay, scoreType)
         local scoreActor = paneDisplay:GetChild(scoreType.."HighScore")
@@ -125,7 +137,6 @@ local GetScoresRequestProcessor = function(res, master)
         local steps = GAMESTATE:GetCurrentSteps("PlayerNumber_P"..i)
         local paneDisplay = master:GetChild("PaneDisplayP"..i)
         local cttext = paneDisplay:GetChild("CTText")
-        local data = res and res["status"] == "success" and res["data"] or nil
         local worldRecordSet, personalRecordSet = false, false
 
         if data and data[playerStr] and data[playerStr]["gsLeaderboard"] and HashCacheEntry(steps) == data[playerStr]["chartHash"]
@@ -218,7 +229,7 @@ af.SetCommand = function(self)
 	self:stoptweening():sleep(0.5):queuecommand("CheckScores")
 end
 
-af[#af+1] = RequestResponseActor("GetScores", 10)..{
+af[#af+1] = RequestResponseActor(17, 50)..{
     OnCommand=function(self)
         for player in ivalues(GAMESTATE:GetHumanPlayers()) do
             -- If a profile is joined for this player, try and fetch the API key.

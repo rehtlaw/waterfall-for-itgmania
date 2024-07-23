@@ -460,7 +460,7 @@ end
 
 local af = Def.ActorFrame {
 	Name="AutoSubmitMaster",
-	RequestResponseActor("AutoSubmit", 10)..{
+	RequestResponseActor(17, 50)..{
 		OnCommand=function(self)
 			local sendRequest = false
 			local data = {
