@@ -21,8 +21,8 @@ end
 
 -- function to determine for some player ("P1"/"P2") whether the actors should be overridden by groovestats
 local UseGSScore = function(pn)
-	return (IsServiceAllowed(SL.GrooveStats.GetScores)) and (SL[pn].ApiKey ~= "")
-	and (SL[pn].ActiveModifiers.SimulateITGEnv) and 
+	return SL.GrooveStats.IsConnected and (SL[pn].ApiKey ~= "")
+	and ((SL[pn].ActiveModifiers.SimulateITGEnv) or SL[pn].ActiveModifiers.AlwaysGS) and
 	((SL.Global.ActiveModifiers.MusicRate == 1.0) or SL[pn].ActiveModifiers.GSOverride)
 end
 
@@ -134,16 +134,24 @@ local GetScoresRequestProcessor = function(res, params)
 
     for i = 1, 2 do
         local playerStr = "player"..i
+        local rivalNum = 1
+		local worldRecordSet = false
+		local personalRecordSet = false
         local steps = GAMESTATE:GetCurrentSteps("PlayerNumber_P"..i)
         local paneDisplay = master:GetChild("PaneDisplayP"..i)
         local cttext = paneDisplay:GetChild("CTText")
         local worldRecordSet, personalRecordSet = false, false
 
         if data and data[playerStr] and data[playerStr]["gsLeaderboard"] and HashCacheEntry(steps) == data[playerStr]["chartHash"]
-            and SL["P"..i].ActiveModifiers.SimulateITGEnv
+            and (SL["P"..i].ActiveModifiers.SimulateITGEnv or SL["P"..i].ActiveModifiers.AlwaysGS)
             and ((SL.Global.ActiveModifiers.MusicRate == 1.0) or SL["P"..i].ActiveModifiers.GSOverride) then
 
-            for _, gsEntry in ipairs(data[playerStr]["gsLeaderboard"]) do
+            local leaderboardData = nil
+            if data[playerStr]["gsLeaderboard"] then
+                leaderboardData = data[playerStr]["gsLeaderboard"]
+            end
+
+            for gsEntry in ivalues(leaderboardData) do
                 if gsEntry["rank"] == 1 then
                     processEntry(gsEntry, paneDisplay, "Machine")
                     worldRecordSet = true
@@ -161,10 +169,13 @@ local GetScoresRequestProcessor = function(res, params)
                 end
 
                 if gsEntry["isRival"] then
-                    local rivalNum = 1
                     local rivalScore = paneDisplay:GetChild("Rival"..rivalNum.."Score")
                     local rivalName = paneDisplay:GetChild("Rival"..rivalNum.."Name")
-                    SetNameAndScore(GetMachineTag(gsEntry), string.format("%0.2f", gsEntry["score"]/100), rivalName, rivalScore)
+                    SetNameAndScore(
+                        GetMachineTag(gsEntry), 
+                        string.format("%0.2f", gsEntry["score"]/100),
+                        rivalName,
+                        rivalScore)
                     rivalNum = rivalNum + 1
                 end
             end
@@ -174,7 +185,7 @@ local GetScoresRequestProcessor = function(res, params)
         if not personalRecordSet then paneDisplay:GetChild("PlayerHighScoreName"):queuecommand("SetDefault") end
 
         if UseGSScore("P"..i) then
-            for j = (personalRecordSet and 2 or 1), 3 do
+            for j = rivalNum, 3 do
                 local rivalScore = paneDisplay:GetChild("Rival"..j.."Score")
                 local rivalName = paneDisplay:GetChild("Rival"..j.."Name")
                 rivalScore:settext("----")
@@ -230,6 +241,7 @@ af.SetCommand = function(self)
 end
 
 af[#af+1] = RequestResponseActor(17, 50)..{
+    Name="GetScoreRequester",
     OnCommand=function(self)
         for player in ivalues(GAMESTATE:GetHumanPlayers()) do
             -- If a profile is joined for this player, try and fetch the API key.
@@ -245,12 +257,13 @@ af[#af+1] = RequestResponseActor(17, 50)..{
         end
     end,
     CheckScoresCommand=function(self)
+        local master = self:GetParent()
         chartchanged = false
         if not (GAMESTATE:GetCurrentSong() or GAMESTATE:GetCurrentCourse()) then return end
         
         -- signal everything to set default for any of these exit conditions
-        local defaultall = GAMESTATE:IsCourseMode() or not IsServiceAllowed(SL.GrooveStats.GetScores) or 
-            not (SL.P1.ActiveModifiers.SimulateITGEnv or SL.P2.ActiveModifiers.SimulateITGEnv) or 
+        local defaultall = GAMESTATE:IsCourseMode() or not IsServiceAllowed(SL.GrooveStats.GetScores) or
+            not ((SL.P1.ActiveModifiers.SimulateITGEnv or SL.P1.ActiveModifiers.AlwaysGS) or (SL.P2.ActiveModifiers.SimulateITGEnv or SL.P2.ActiveModifiers.AlwaysGS)) or
             not (SL.Global.ActiveModifiers.MusicRate == 1.0 or SL.P1.ActiveModifiers.GSOverride or SL.P2.ActiveModifiers.GSOverride)
 
         if defaultall then
@@ -259,7 +272,9 @@ af[#af+1] = RequestResponseActor(17, 50)..{
         end
 
         local sendRequest = false
-        local data = { action="groovestats/player-scores" }
+        local headers = {}
+        local query = {}
+        local requestCacheKey = ""
 
         for i=1,2 do
             local pn = "P"..i
@@ -267,7 +282,9 @@ af[#af+1] = RequestResponseActor(17, 50)..{
             local hash = steps and HashCacheEntry(steps)
             local pane = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("PaneDisplayMaster"):GetChild("PaneDisplayP"..i)
             if (SL[pn].ApiKey ~= "") and hash then
-                data["player"..i] = { chartHash=hash, apiKey=SL[pn].ApiKey }
+                query["chartHashP"..i] = hash
+                headers["x-api-key-player-"..i] = SL[pn].ApiKey
+                requestCacheKey = requestCacheKey .. hash .. SL[pn].ApiKey .. pn
                 if UseGSScore(pn) then pane:playcommand("SetLoading") end
                 sendRequest = true
             else
@@ -276,11 +293,24 @@ af[#af+1] = RequestResponseActor(17, 50)..{
         end
 
         if sendRequest then
-            MESSAGEMAN:Broadcast("GetScores", {
-                data=data,
-                args=SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("PaneDisplayMaster"),
-                callback=GetScoresRequestProcessor
-            })
+            requestCacheKey = CRYPTMAN:SHA256String(requestCacheKey.."-player-scores")
+			local params = {requestCacheKey=requestCacheKey, master=master}
+			RemoveStaleCachedRequests()
+			-- If the data is still in the cache, run the request processor directly
+			-- without making a request with the cached response.
+			if SL.GrooveStats.RequestCache[requestCacheKey] ~= nil then
+				local res = SL.GrooveStats.RequestCache[requestCacheKey].Response
+				GetScoresRequestProcessor(res, params)
+			else
+				self:playcommand("MakeGrooveStatsRequest", {
+					endpoint="player-scores.php?"..NETWORK:EncodeQueryParameters(query),
+					method="GET",
+					headers=headers,
+					timeout=10,
+					callback=GetScoresRequestProcessor,
+					args=params,
+				})
+			end
         end
     end,
 }
