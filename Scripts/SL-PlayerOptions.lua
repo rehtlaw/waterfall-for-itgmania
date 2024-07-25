@@ -1107,7 +1107,35 @@ local Overrides = {
 				mods.GSOverride = self.Values[FindInTable(true, list) or 1]
 			end
 		end
-	}
+	},
+    AlwaysGS = {
+        OneChoiceForAllPlayers = true,
+        ExportOnChange = true,
+        Choices = { "No", "Yes" },
+        Values = { false, true },
+        LoadSelections = function(self, list, pn)
+			if SCREENMAN:GetTopScreen():GetName() == "ScreenCustomProfile" then
+				for i,v in ipairs(self.Values) do
+					if WF.CustomProfileOptions.AlwaysGS == v then list[i] = true end
+				end
+			else
+				local mods = SL[ToEnumShortString(pn)].ActiveModifiers
+				list[FindInTable(mods.AlwaysGS, self.Values) or 1] = true
+			end
+			return list
+		end,
+		SaveSelections = function(self, list, pn)
+			if SCREENMAN:GetTopScreen():GetName() == "ScreenCustomProfile" then
+				for i,v in ipairs(self.Values) do
+					if list[i] then WF.CustomProfileOptions.AlwaysGS = v end
+				end
+			else
+				local mods = SL[ToEnumShortString(pn)].ActiveModifiers
+				mods.AlwaysGS = self.Values[FindInTable(true, list) or 1]
+			end
+		end
+
+    }
 }
 
 

@@ -61,6 +61,7 @@ local profile_whitelist = {
 	PreferredGameEnv = "string",
 	PreferredFaultWindow = "number",
 	GSOverride = "boolean",
+    AlwaysGS = "boolean",
 	
 	-- Waterfall expanded stuff
 	catJAM = "boolean",

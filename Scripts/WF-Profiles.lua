@@ -41,7 +41,8 @@ WF.CustomProfileOptionDefaults = {
     PreferredSecondGraph = "Life",
     PreferredGameEnv = "Waterfall",
 	PreferredFaultWindow = "Enabled",
-    GSOverride = false
+    GSOverride = false,
+    AlwaysGS = false
 }
 WF.CustomProfileOptions = DeepCopy(WF.CustomProfileOptionDefaults)
 

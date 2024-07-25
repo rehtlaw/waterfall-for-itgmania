@@ -64,7 +64,8 @@ local PlayerDefaults = {
 				PreferredGameEnv = "Waterfall",
 				PreferredFaultWindow = 1,
 				GSOverride = false,
-
+                AlwaysGS = false,
+				
 				-- Fun stuff
 
 				GIF = "None",
