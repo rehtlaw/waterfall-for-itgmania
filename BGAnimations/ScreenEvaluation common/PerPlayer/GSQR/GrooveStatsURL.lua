@@ -2,11 +2,11 @@ local args = ...
 local player = args.player
 local hash = args.hash
 local pn = tonumber(player:sub(-1))
+local other_pn = ToEnumShortString(player)
 local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
 local steps = GAMESTATE:GetCurrentSteps(player)
 local radar_values = steps:GetRadarValues(player)
 
-local score = WF.ITGScore[pn]:gsub("%.", "")
 local failed = WF.ITGFailed[pn] and "1" or "0"
 local rate = tostring(SL.Global.ActiveModifiers.MusicRate * 100):gsub("%.", "")
 local judgmentCounts = WF.ITGJudgmentCounts[pn]
@@ -25,8 +25,8 @@ local fantastic_plus = pss:GetTapNoteScores( "TapNoteScore_W1" )
 local fantastic = judgmentCounts[1] - fantastic_plus
 local excellent = judgmentCounts[2]
 local great = judgmentCounts[3]
-local decent = judgmentCounts[4] -- could be nil
-local wayOff = judgmentCounts[5] -- could be nil
+local decent = judgmentCounts[4]
+local wayOff = judgmentCounts[5]
 local miss = judgmentCounts[6]
 local total_steps = steps:GetRadarValues(player):GetValue( "RadarCategory_TapsAndHolds" )
 local holds_held = judgmentCounts[7]
@@ -36,7 +36,7 @@ local total_mines = radar_values:GetValue("RadarCategory_Mines")
 local rolls_held = judgmentCounts[8]
 local total_rolls = radar_values:GetValue("RadarCategory_Rolls")
 
-for option in ivalues(GAMESTATE:GetPlayerState(pn):GetPlayerOptionsArray("ModsLevel_Preferred")) do
+for option in ivalues(GAMESTATE:GetPlayerState(other_pn):GetPlayerOptionsArray("ModsLevel_Preferred")) do
 	if option:match("NoMines") then
 		total_mines = 0
 	end
@@ -56,7 +56,7 @@ elseif preferredFaults == 3 then
 	wayOff = ("%x"):format(wayOff)
 end
 
-local cmod = GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred"):CMod()
+local cmod = GAMESTATE:GetPlayerState(other_pn):GetPlayerOptions("ModsLevel_Preferred"):CMod()
 local used_cmod = cmod ~= nil and "1" or "0"
 
 local rescored = {
