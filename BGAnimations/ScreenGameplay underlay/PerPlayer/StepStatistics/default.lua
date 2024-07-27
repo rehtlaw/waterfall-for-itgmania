@@ -31,7 +31,6 @@ local bg_and_judgments = Def.ActorFrame{
 	LoadActor("./JudgmentLabels.lua", player),
 	LoadActor("./JudgmentNumbers.lua", player),
 	LoadActor("./GSOverlay.lua", player),
-	
 }
 
 return Def.ActorFrame{
