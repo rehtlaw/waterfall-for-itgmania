@@ -90,5 +90,4 @@ local url = ("HTTPS://GROOVESTATS.COM/QR/%s/T%xG%xH%xI%xJ%xK%sL%sM%xH%xT%xR%xT%x
         holds_held, total_holds, rolls_held, total_rolls, mines_hit, total_mines, rescored_str,
         failed, rate, used_cmod, hash_version):upper()
 
-SM(url)
 return url
