@@ -12,183 +12,292 @@ local SetEntryText = function(rank, name, score, date, actor)
 	actor:GetChild("Date"):settext(date)
 end
 
+local GetJudgmentCounts = function(player)
+	local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
+	local pnum = tonumber(player:sub(-1))
+    local judgmentCounts = {}
+
+    judgmentCounts["fantasticPlus"] = pss:GetTapNoteScores("TapNoteScore_W1")
+    judgmentCounts["fantastic"] = WF.ITGJudgmentCounts[pnum][1]-pss:GetTapNoteScores("TapNoteScore_W1")
+	judgmentCounts["excellent"] = WF.ITGJudgmentCounts[pnum][2]
+	judgmentCounts["great"] = WF.ITGJudgmentCounts[pnum][3]
+
+	if WF.SelectedErrorWindowSetting == 3 then
+		-- Decents are only enabled when fault window is set to "Extended"
+		judgmentCounts["decent"] = WF.ITGJudgmentCounts[pnum][4]
+	end
+	if WF.SelectedErrorWindowSetting ~= 2 then
+		-- Way offs are enabled when fault window is either Enabled or Extended
+		-- In other words, not disabled
+		judgmentCounts["wayOff"] = WF.ITGJudgmentCounts[pnum][5]
+	end
+	judgmentCounts["miss"] = WF.ITGJudgmentCounts[pnum][6]
+
+	judgmentCounts["totalSteps"] = pss:GetRadarPossible():GetValue("RadarCategory_TapsAndHolds")
+
+	local possible = pss:GetRadarPossible()
+	local actual = pss:GetRadarActual()
+
+	judgmentCounts["minesHit"] 		= possible:GetValue("RadarCategory_Mines")-actual:GetValue("RadarCategory_Mines")
+	judgmentCounts["totalMines"]	= possible:GetValue("RadarCategory_Mines")
+	judgmentCounts["holdsHeld"]		= actual:GetValue("RadarCategory_Holds")
+	judgmentCounts["totalHolds"]	= possible:GetValue("RadarCategory_Holds")
+	judgmentCounts["rollsHeld"]		= actual:GetValue("RadarCategory_Rolls")
+	judgmentCounts["totalRolls"]	= possible:GetValue("RadarCategory_Rolls")
+    return judgmentCounts
+end
+
+local GetRescoredJudgmentCounts = function(player)
+    -- TODO: actual implement recalcs
+	local pn = ToEnumShortString(player)
+
+	local translation = {
+		["W0"] = "fantasticPlus",
+		["W1"] = "fantastic",
+		["W2"] = "excellent",
+		["W3"] = "great",
+		["W4"] = "decent",
+		["W5"] = "wayOff",
+	}
+
+	local rescored = {
+		["fantasticPlus"] = 0,
+		["fantastic"] = 0,
+		["excellent"] = 0,
+		["great"] = 0,
+		["decent"] = 0,
+		["wayOff"] = 0
+	}
+	
+	-- for i=1,GAMESTATE:GetCurrentStyle():ColumnsPerPlayer() do
+	-- 	for window, name in pairs(translation) do
+	-- 		rescored[name] = rescored[name] + SL[pn].Stages.Stats[SL.Global.Stages.PlayedThisGame + 1].column_judgments[i]["Early"][window]
+	-- 	end
+	-- end
+
+	return rescored
+end
+
+local AttemptDownloads = function(res)
+	local data = JsonDecode(res.body)
+	for i=1,2 do
+		local playerStr = "player"..i
+		local events = {"rpg", "itl"}
+
+		for event in ivalues(events) do
+			if data and data[playerStr] and data[playerStr][event] then
+				local eventData = data[playerStr][event]
+				local eventName = eventData["name"] or "Unknown Event"
+
+				-- See if any quests were completed.
+				if eventData["progress"] and eventData["progress"]["questsCompleted"] then
+					local quests = eventData["progress"]["questsCompleted"]
+					-- Iterate through the quests...
+					for quest in ivalues(quests) do
+						-- ...and check for any unlocks.
+						if quest["songDownloadUrl"] then
+							local url = quest["songDownloadUrl"]
+							local title = quest["title"] or ""
+
+							if ThemePrefs.Get("SeparateUnlocksByPlayer") then
+								local profileName = "NoName"
+								local player = "PlayerNumber_P"..i
+								if (PROFILEMAN:IsPersistentProfile(player) and
+										PROFILEMAN:GetProfile(player)) then
+									profileName = PROFILEMAN:GetProfile(player):GetDisplayName()
+								end
+								title = title.." - "..profileName
+								DownloadEventUnlock(url, "["..eventName.."] "..title, eventName.." Unlocks - "..profileName)
+							else
+								DownloadEventUnlock(url, "["..eventName.."] "..title, eventName.." Unlocks")
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 local AutoSubmitRequestProcessor = function(res, overlay)
 	local hasRpg = false
 	local showRpg = false
 	local rpgname
+
+    local shouldDisplayOverlay = false
 	
 	local shownotif = {false, false}
 	local wrplr = 0
 	
-	if (res ~= nil) and res["status"] == "success" then
-		for i = 1, 2 do
-			local playerStr = "player"..i
-			local data = res["data"]
-
-			if data and data[playerStr] then
-				local steps = GAMESTATE:GetCurrentSteps("PlayerNumber_P"..i)
-				local loweraf = overlay:GetChild("P"..i.."_AF_Lower")
-				local loweraf2 = overlay:GetChild("P"..i.."_AF_Lower2")
-				if HashCacheEntry(steps) == data[playerStr]["chartHash"] then
-					-- show notification based on result
-					if data[playerStr]["result"] == "score-added" or data[playerStr]["result"] == "improved"
-					or data[playerStr]["result"] == "score-not-improved"
-					or data[playerStr]["result"] == "score-improved" then
-						shownotif[i] = true
-
-						-- set qr panes to "already submitted"
-						if loweraf:GetChild("GSQR") then
-							loweraf:GetChild("GSQR"):playcommand("SetAlreadySubmitted")
-						end
-						if loweraf2 and loweraf2:GetChild("GSQR2") then
-							loweraf2:GetChild("GSQR2"):playcommand("SetAlreadySubmitted")
-						end
-					elseif not data[playerStr]["isRanked"] then
-						-- set qr panes to "not ranked"
-						if loweraf:GetChild("GSQR") then
-							loweraf:GetChild("GSQR"):playcommand("SetNotRanked")
-						end
-						if loweraf2 and loweraf2:GetChild("GSQR2") then
-							loweraf2:GetChild("GSQR2"):playcommand("SetNotRanked")
-						end
-					end
-
-					if data[playerStr]["isRanked"] then
-						-- call command for gs leaderboard panes to show
-						if loweraf:GetChild("GSLeaderboard") then
-							loweraf:GetChild("GSLeaderboard"):playcommand("AddGSLeaderboard",
-								data[playerStr]["gsLeaderboard"])
-						end
-						if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
-							loweraf2:GetChild("GSLeaderboard2"):playcommand("AddGSLeaderboard",
-								data[playerStr]["gsLeaderboard"])
-						end
-
-						-- wr stuff
-						if data[playerStr]["result"] ~= "score-not-improved" then
-							for gsEntry in ivalues(data[playerStr]["gsLeaderboard"]) do
-								if gsEntry["isSelf"] and gsEntry["rank"] == 1 then
-									-- in the event both leaderboards return a self rank of 1, player 2 is
-									-- more "up to date" so just take the highest player that received it
-									wrplr = i
-									break
-								end
-							end
-						end
-					end
-
-					if data[playerStr]["itl"] then
-						-- call command for gs leaderboard panes to show
-						if loweraf:GetChild("ITLLeaderboard") then
-							loweraf:GetChild("ITLLeaderboard"):playcommand("AddITLLeaderboard",
-								data[playerStr]["itl"]["itlLeaderboard"])
-						end
-						if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
-							loweraf2:GetChild("ITLLeaderboard2"):playcommand("AddITLLeaderboard",
-								data[playerStr]["itl"]["itlLeaderboard"])
-						end
-					end
-
-					if data[playerStr]["rpg"] then
-						-- call command for gs leaderboard panes to show
-						if loweraf:GetChild("RPGLeaderboard") then
-							loweraf:GetChild("RPGLeaderboard"):playcommand("AddRPGLeaderboard",
-								data[playerStr]["rpg"]["rpgLeaderboard"])
-						end
-						if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
-							loweraf2:GetChild("RPGLeaderboard2"):playcommand("AddRPGLeaderboard",
-								data[playerStr]["rpg"]["rpgLeaderboard"])
-						end
-					end
-
-					-- Getting this ready for ITL release, but it is not fully functional.
-					-- Currently, if you play a song in both RPG and ITL, it will only show 
-					-- the results for ITL. Disabling the RPG tree entirely for now.
-					-- Hopefully I'll get this ready by the time RPG6 is out
-					-- Zarzob
-					
-					if data[playerStr]["rpg"] or data[playerStr]["itl"] then
-						hasRpg = true
-						--rpgname = data[playerStr]["rpg"]["name"]
-						WF.RPGData[i] = data[playerStr]["rpg"]
-					
-						-- add option to L+R menu
-						table.insert(WF.MenuSelections[i], 
-						{ "View Event stats", true })
-						overlay:GetChild("MenuOverlay"):queuecommand("Update")
-						
-						-- if itg mode, set showrpg flag
-						--if SL["P"..i].ActiveModifiers.SimulateITGEnv then
-							showRpg = true
-						--end
-					end
-					
-					--if data[playerStr]["itl"] then
-					--	hasRpg = true
-					--	rpgname = data[playerStr]["itl"]["name"]
-					--	WF.RPGData[i] = data[playerStr]["itl"]
-					--
-					--	-- add option to L+R menu
-					--	table.insert(WF.MenuSelections[i], 
-					--	{ "View ITL 2022 stats", true })
-					--	overlay:GetChild("MenuOverlay"):queuecommand("Update")
-					--
-					--	-- if itg mode, set showrpg flag
-					--	if SL["P"..i].ActiveModifiers.SimulateITGEnv then
-					--		showRpg = true
-					--	end
-					--end
-				end
-			end
+	if res.error or res.statusCode ~= 200 then
+		local error = res.error and ToEnumShortString(res.error) or nil
+		if error == "Timeout" then
+            if GAMESTATE:IsSideJoined(PLAYER_1) then overlay:GetChild("P1_AF_Upper"):GetChild("GSNotification"):playcommand("SetTimeout") end
+            if GAMESTATE:IsSideJoined(PLAYER_2) then overlay:GetChild("P2_AF_Upper"):GetChild("GSNotification"):playcommand("SetTimeout") end
+		elseif error or (res.statusCode ~= nil and res.statusCode ~= 200) then
+            if GAMESTATE:IsSideJoined(PLAYER_1) then overlay:GetChild("P1_AF_Upper"):GetChild("GSNotification"):playcommand("SetFail") end
+            if GAMESTATE:IsSideJoined(PLAYER_2) then overlay:GetChild("P2_AF_Upper"):GetChild("GSNotification"):playcommand("SetFail") end
 		end
-
-		-- now do one more loop to show the proper notifications
-		for i = 1, 2 do
-			-- set shownotif to false if player got wr, and broadcast wr message
-			if wrplr == i then
-				shownotif[i] = false
-				MESSAGEMAN:Broadcast("GSWorldRecord", {player = "PlayerNumber_P"..i})
-			end
-
-			if shownotif[i] then
-				local notifarg = ((hasRpg) and (not showRpg))
-				overlay:GetChild("P"..i.."_AF_Upper"):GetChild("GSNotification")
-					:playcommand("SetSuccess", {notifarg, rpgname})
-			end
-
-			if showRpg then
-				local rpgAf = overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay")
-					:GetChild("P"..i.."RpgAf")
-				if rpgAf and res["data"]["player"..i] and res["data"]["player"..i]["rpg"] then
-					rpgAf:playcommand("Show", {data=res["data"]["player"..i]})
-				end
-			end
-			
-			if showRpg then
-				local rpgAf = overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay")
-					:GetChild("P"..i.."RpgAf")
-				if rpgAf and res["data"]["player"..i] and res["data"]["player"..i]["itl"] then
-					rpgAf:playcommand("Show", {data=res["data"]["player"..i]})
-				end
-			end
-			
-			
-		end
-
-		-- finally, if we determined to show rpg automatically, do that now
-		if showRpg then
-			overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):visible(true)
-			overlay:queuecommand("DirectInputToRpgHandler")
-		end
-	else
-		-- just signal fail for active players that tried to submit
-		for i = 1, 2 do
-			if SL["P"..i].ApiKey ~= "" then
-				overlay:GetChild("P"..i.."_AF_Upper"):GetChild("GSNotification"):playcommand("SetFail")
-				return
-			end
-		end
+		return
 	end
+
+    local data = JsonDecode(res.body)
+    for i = 1, 2 do
+        local playerStr = "player"..i
+        local entryNum = 1
+        local rivalNum = 1
+
+        if data and data[playerStr] then
+            local steps = GAMESTATE:GetCurrentSteps("PlayerNumber_P"..i)
+            local loweraf = overlay:GetChild("P"..i.."_AF_Lower")
+            local loweraf2 = overlay:GetChild("P"..i.."_AF_Lower2")
+            if HashCacheEntry(steps) == data[playerStr]["chartHash"] then
+                -- show notification based on result
+                if data[playerStr]["result"] == "score-added" or data[playerStr]["result"] == "improved"
+                    or data[playerStr]["result"] == "score-not-improved"
+                    or data[playerStr]["result"] == "score-improved" then
+                    shownotif[i] = true
+
+                    -- set qr panes to "already submitted"
+                    if loweraf:GetChild("GSQR") then
+                        loweraf:GetChild("GSQR"):playcommand("SetAlreadySubmitted")
+                    end
+                    if loweraf2 and loweraf2:GetChild("GSQR2") then
+                        loweraf2:GetChild("GSQR2"):playcommand("SetAlreadySubmitted")
+                    end
+                end
+
+                if data[playerStr]["isRanked"] then
+                    -- call command for gs leaderboard panes to show
+                    if loweraf:GetChild("GSLeaderboard") then
+                        loweraf:GetChild("GSLeaderboard"):playcommand("AddGSLeaderboard",
+                            data[playerStr]["gsLeaderboard"])
+                    end
+                    if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
+                        loweraf2:GetChild("GSLeaderboard2"):playcommand("AddGSLeaderboard",
+                            data[playerStr]["gsLeaderboard"])
+                    end
+
+                    -- wr stuff
+                    if data[playerStr]["result"] ~= "score-not-improved" then
+                        for gsEntry in ivalues(data[playerStr]["gsLeaderboard"]) do
+                            if gsEntry["isSelf"] and gsEntry["rank"] == 1 then
+                                -- in the event both leaderboards return a self rank of 1, player 2 is
+                                -- more "up to date" so just take the highest player that received it
+                                wrplr = i
+                                break
+                            end
+                        end
+                    end
+                end
+
+                if data[playerStr]["itl"] then
+                    -- call command for gs leaderboard panes to show
+                    if loweraf:GetChild("ITLLeaderboard") then
+                        loweraf:GetChild("ITLLeaderboard"):playcommand("AddITLLeaderboard",
+                            data[playerStr]["itl"]["itlLeaderboard"])
+                    end
+                    if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
+                        loweraf2:GetChild("ITLLeaderboard2"):playcommand("AddITLLeaderboard",
+                            data[playerStr]["itl"]["itlLeaderboard"])
+                    end
+                end
+
+                if data[playerStr]["rpg"] then
+                    -- call command for gs leaderboard panes to show
+                    if loweraf:GetChild("RPGLeaderboard") then
+                        loweraf:GetChild("RPGLeaderboard"):playcommand("AddRPGLeaderboard",
+                            data[playerStr]["rpg"]["rpgLeaderboard"])
+                    end
+                    if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
+                        loweraf2:GetChild("RPGLeaderboard2"):playcommand("AddRPGLeaderboard",
+                            data[playerStr]["rpg"]["rpgLeaderboard"])
+                    end
+                end
+
+                -- Getting this ready for ITL release, but it is not fully functional.
+                -- Currently, if you play a song in both RPG and ITL, it will only show 
+                -- the results for ITL. Disabling the RPG tree entirely for now.
+                -- Hopefully I'll get this ready by the time RPG6 is out
+                -- Zarzob
+
+                if data[playerStr]["rpg"] or data[playerStr]["itl"] then
+                    hasRpg = true
+                    --rpgname = data[playerStr]["rpg"]["name"]
+                    WF.RPGData[i] = data[playerStr]["rpg"]
+
+                    -- add option to L+R menu
+                    table.insert(WF.MenuSelections[i], 
+                        { "View Event stats", true })
+                    overlay:GetChild("MenuOverlay"):queuecommand("Update")
+
+                    -- if itg mode, set showrpg flag
+                    --if SL["P"..i].ActiveModifiers.SimulateITGEnv then
+                    showRpg = true
+                    --end
+                end
+
+                --if data[playerStr]["itl"] then
+                --	hasRpg = true
+                --	rpgname = data[playerStr]["itl"]["name"]
+                --	WF.RPGData[i] = data[playerStr]["itl"]
+                --
+                --	-- add option to L+R menu
+                --	table.insert(WF.MenuSelections[i], 
+                --	{ "View ITL 2022 stats", true })
+                --	overlay:GetChild("MenuOverlay"):queuecommand("Update")
+                --
+                --	-- if itg mode, set showrpg flag
+                --	if SL["P"..i].ActiveModifiers.SimulateITGEnv then
+                --		showRpg = true
+                --	end
+                --end
+            end
+        end
+    end
+
+    -- now do one more loop to show the proper notifications
+    for i = 1, 2 do
+        -- set shownotif to false if player got wr, and broadcast wr message
+        if wrplr == i then
+            shownotif[i] = false
+            MESSAGEMAN:Broadcast("GSWorldRecord", {player = "PlayerNumber_P"..i})
+        end
+
+        if shownotif[i] then
+            local notifarg = ((hasRpg) and (not showRpg))
+            overlay:GetChild("P"..i.."_AF_Upper"):GetChild("GSNotification")
+            :playcommand("SetSuccess", {notifarg, rpgname})
+        end
+
+        if showRpg then
+            local rpgAf = overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay")
+            :GetChild("P"..i.."RpgAf")
+            if rpgAf and res["data"]["player"..i] and res["data"]["player"..i]["rpg"] then
+                rpgAf:playcommand("Show", {data=res["data"]["player"..i]})
+            end
+        end
+
+        if showRpg then
+            local rpgAf = overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay")
+            :GetChild("P"..i.."RpgAf")
+            if rpgAf and res["data"]["player"..i] and res["data"]["player"..i]["itl"] then
+                rpgAf:playcommand("Show", {data=res["data"]["player"..i]})
+            end
+        end
+
+
+    end
+
+    -- finally, if we determined to show rpg automatically, do that now
+    if showRpg then
+        overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):visible(true)
+        overlay:queuecommand("DirectInputToRpgHandler")
+    end
+
+    if ThemePrefs.Get("AutoDownloadUnlocks") then
+        AttemptDownloads(res)
+    end
 end
 
 local CreateCommentString = function(player)
@@ -201,7 +310,7 @@ local CreateCommentString = function(player)
 	
 	-- Waterfall score
 	local PercentDP = pss:GetPercentDancePoints()
-	local wfscore = FormatPercentScore(PercentDP)	
+	local wfscore = FormatPercentScore(PercentDP)
 	
 	-- for FA%, holds, rolls, mines
 	local possible = pss:GetRadarPossible()
@@ -463,10 +572,11 @@ local af = Def.ActorFrame {
 	RequestResponseActor(17, 50)..{
 		OnCommand=function(self)
 			local sendRequest = false
-			local data = {
-				action="groovestats/score-submit",
+            local headers = {}
+			local query = {
 				maxLeaderboardResults=NumEntries,
 			}
+            local body = {}
 
 			local rate = SL.Global.ActiveModifiers.MusicRate * 100
 			if rate < 100 then return end
@@ -483,7 +593,7 @@ local af = Def.ActorFrame {
 						valid and
 						SL[pn].IsPadPlayer then
 						
-					local usedCmod, judgmentCounts = CreateExtraSubmissionString(player)
+					local usedCmod, _ = CreateExtraSubmissionString(player)
 			
 					local percentDP = stats:GetPercentDancePoints()
 					local score = tonumber((WF.ITGScore[i]:gsub("%.", "")))
@@ -497,15 +607,17 @@ local af = Def.ActorFrame {
 					local hash = HashCacheEntry(steps)
 					
 					if (SL[pn].ApiKey ~= "") and (hash) and (hash ~= "") then
-						data["player"..i] = {
-							chartHash=hash,
-							apiKey=SL[pn].ApiKey,
+                        query["chartHashP"..i] = hash
+                        headers["x-api-key-player-"..i] = SL[pn].ApiKey
+
+						body["player"..i] = {
 							rate=rate,
 							score=score,
+                            judgmentCounts=GetJudgmentCounts(player),
+                            rescoreCounts=GetRescoredJudgmentCounts(player),
+							usedCmod=usedCmod,
 							comment=CreateCommentString(player),
 							profileName=profileName,
-							usedCmod=usedCmod,
-							judgmentCounts=judgmentCounts
 						}
 						sendRequest = true
 					end
@@ -513,10 +625,14 @@ local af = Def.ActorFrame {
 			end
 			-- Only send the request if it's applicable.
 			if sendRequest then
-				MESSAGEMAN:Broadcast("AutoSubmit", {
-					data=data,
+				self:playcommand("MakeGrooveStatsRequest", {
+					endpoint="score-submit.php?"..NETWORK:EncodeQueryParameters(query),
+					method="POST",
+					headers=headers,
+					body=JsonEncode(body),
+					timeout=30,
+					callback=AutoSubmitRequestProcessor,
 					args=SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("ScreenEval Common"),
-					callback=AutoSubmitRequestProcessor
 				})
 			end
 		end

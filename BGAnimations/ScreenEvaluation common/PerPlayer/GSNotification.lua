@@ -49,6 +49,8 @@ return Def.ActorFrame{
             SetSuccessCommand = function(self) self:settext("✔ ITG score submitted.")
                 self:queuecommand("DelayAndHide") end,
             SetFailCommand = function(self) self:settext("❌ Failed to submit...")
+                self:queuecommand("DelayAndHide") end,
+            SetTimeoutCommand = function(self) self:settext("❌ Timed out")
                 self:queuecommand("DelayAndHide") end
         }
     },
