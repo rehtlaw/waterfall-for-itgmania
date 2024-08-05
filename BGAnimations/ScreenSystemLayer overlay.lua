@@ -212,7 +212,15 @@ local NewSessionRequestProcessor = function(res, gsInfo)
 
 	-- All services are enabled, display a green check.
 	if SL.GrooveStats.GetScores and SL.GrooveStats.Leaderboard and SL.GrooveStats.AutoSubmit then
-		groovestats:settext("✔ GrooveStats")
+		if ThemePrefs.Get("UseBoogieStats") then
+			if string.find(PREFSMAN:GetPreference("HttpAllowHosts"), "boogiestats.andr.host") then
+				groovestats:settext("✔ BoogieStats")
+			else
+				groovestats:settext("✔ GrooveStats (BoogieStats host not in allow list)")
+			end
+		else
+			groovestats:settext("✔ GrooveStats")
+		end
         SL.GrooveStats.IsConnected = true
 	-- All services are disabled, display a red X.
 	elseif not SL.GrooveStats.GetScores and not SL.GrooveStats.Leaderboard and not SL.GrooveStats.AutoSubmit then
@@ -250,14 +258,22 @@ t[#t+1] = Def.ActorFrame{
 
 	LoadFont("Common Normal")..{
 		Name="GrooveStats",
-		Text=" ... GrooveStats",
+		Text="     GrooveStats",
 		InitCommand=function(self)
             self:visible(ThemePrefs.Get("EnableGrooveStats"))
             self:diffuse(TextColor):horizalign(left)
         end,
 		ResetCommand=function(self)
             self:visible(ThemePrefs.Get("EnableGrooveStats"))
-            self:settext(" ... GrooveStats")
+            if ThemePrefs.Get("EnableBoogieStats") then
+				if string.find(PREFSMAN:GetPreference("HttpAllowHosts"), "boogiestats.andr.host") then
+					self:settext("     BoogieStats")
+				else
+					self:settext("     GrooveStats (BoogieStats host not in allow list)")
+				end
+			else
+				self:settext("     GrooveStats")
+			end
         end
 	},
 

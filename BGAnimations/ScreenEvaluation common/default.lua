@@ -476,6 +476,11 @@ for player in ivalues(Players) do
 		HideCommand = function(self) self:visible(false) end
 	}
 
+	lower[#lower+1] = LoadActor("./PerPlayer/GSLeaderboardEX.lua", {player = player})..{
+		ShowCommand = function(self) self:visible(true) end,
+		HideCommand = function(self) self:visible(false) end
+	}
+
 	lower[#lower+1] = LoadActor("./PerPlayer/GSLeaderboard_ITL.lua", {player = player})..{
 		ShowCommand = function(self) self:visible(true) end,
 		HideCommand = function(self) self:visible(false) end
@@ -725,6 +730,11 @@ for player in ivalues(Players) do
 
 		-- add secondary side gs leaderboard
 		lower2[#lower2+1] = LoadActor("./PerPlayer/GSLeaderboard.lua", {player = player, sec = true})..{
+			ShowCommand = function(self) self:visible(true) end,
+			HideCommand = function(self) self:visible(false) end
+		}
+
+		lower2[#lower2+1] = LoadActor("./PerPlayer/GSLeaderboardEX.lua", {player = player, sec = true})..{
 			ShowCommand = function(self) self:visible(true) end,
 			HideCommand = function(self) self:visible(false) end
 		}

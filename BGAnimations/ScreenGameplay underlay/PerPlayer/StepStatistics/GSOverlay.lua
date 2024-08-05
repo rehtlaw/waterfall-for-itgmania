@@ -16,6 +16,26 @@ local height = 80
 local cur_style = 0
 local num_styles = 3
 
+local GrooveStatsBlue = color("#007b85")
+local RpgYellow = color("1,0.972,0.792,1")
+local ItlPink = color("1,0.2,0.406,1")
+local BoogieStatsPurple = color("#8000ff")
+
+local style_color = {
+	[0] = GrooveStatsBlue,  -- Either GrooveStats or GrooveStats EX score
+	[1] = GrooveStatsBlue,  -- Either GrooveStats or GrooveStats EX score
+	[2] = RpgYellow,
+	[3] = ItlPink,
+}
+
+local style_background = {
+	[0] = THEME:GetPathG("", "GrooveStats.png"),
+	[1] = THEME:GetPathG("", "GrooveStats.png"),
+	[2] = THEME:GetPathG("", "SRPG8"),
+	[3] = THEME:GetPathG("", "ITL.png"),
+}
+
+
 local loop_seconds = 5
 local transition_seconds = 1
 
@@ -101,6 +121,27 @@ local LeaderboardRequestProcessor = function(res, master)
 	local playerStr = "player"..n
 	local data = JsonDecode(res.body)
 
+	-- BoogieStats integration
+	-- Find out whether this chart is ranked on GrooveStats.
+	-- If it is unranked, alter groovestats logo and the box border color to the BoogieStats theme
+	local headers = res.headers
+	local boogie = false
+	local boogie_ex = false
+	if headers["bs-leaderboard-player-" .. n] == "BS" then
+		boogie = true
+	elseif headers["bs-leaderboard-player-" .. n] == "BS-EX" then
+		boogie_ex = true
+	end
+	if not SCREENMAN:GetTopScreen():GetChild("Underlay") then return end
+	local gsBox = SCREENMAN:GetTopScreen():GetChild("Underlay"):GetChild("StepStatistics" .. pn):GetChild("ScoreBox" .. pn)
+	if boogie then
+		style_color[0] = BoogieStatsPurple
+		style_color[1] = BoogieStatsPurple
+
+		style_background[0] = THEME:GetPathG("", "BoogieStats.png")
+		style_background[1] = THEME:GetPathG("", "BoogieStatsEX.png")
+	end
+
 	-- First check to see if the leaderboard even exists.
 	if data and data[playerStr] then
 		-- These will get overwritten if we have any entries in the leaderboard below.
@@ -137,7 +178,7 @@ local LeaderboardRequestProcessor = function(res, master)
 									entry["isSelf"],
 									entry["isRival"],
 									entry["isFail"],
-									false
+									boogie_ex
 								)
 				end
 			end
@@ -154,7 +195,7 @@ local LeaderboardRequestProcessor = function(res, master)
 									entry["isSelf"],
 									entry["isRival"],
 									entry["isFail"],
-									false
+									boogie_ex
 								)
 				end
 			end
@@ -177,6 +218,7 @@ local LeaderboardRequestProcessor = function(res, master)
 		end
 
 		if data[playerStr]["rpg"] then
+			cur_style = 3
 			local entryCount = 0
 			SetScoreData(3, 1, "", "No Scores", "", false, false, false)
 
@@ -197,6 +239,7 @@ local LeaderboardRequestProcessor = function(res, master)
 		end
 
 		if data[playerStr]["itl"] then
+			cur_style = 4
 			local numEntries = 0
 			SetScoreData(4, 1, "", "No Scores", "", false, false, false)
 
@@ -326,16 +369,10 @@ local af = Def.ActorFrame{
 	Def.Quad{
 		Name="Outline",
 		InitCommand=function(self)
-			self:diffuse(color("#007b85")):setsize(width + border, height + border)
+			self:diffuse(GrooveStatsBlue):setsize(width + border, height + border)
 		end,
 		LoopScoreboxCommand=function(self)
-			if cur_style == 0 then
-				self:linear(transition_seconds):diffuse(color("#007b85"))
-			elseif cur_style == 1 then
-				self:linear(transition_seconds):diffuse(color("0.38,0.26,1,1"))
-			elseif cur_style == 2 then
-				self:linear(transition_seconds):diffuse(color("1,0.2,0.406,1"))
-			end
+			self:linear(transition_seconds):diffuse(style_color[cur_style])
 		end
 	},
 	-- Main body
@@ -347,10 +384,16 @@ local af = Def.ActorFrame{
 	},
 	-- GrooveStats Logo
 	Def.Sprite{
-		Texture=THEME:GetPathG("", "GrooveStats.png"),
+		Texture=style_background[0],
 		Name="GrooveStatsLogo",
 		InitCommand=function(self)
 			self:zoom(0.8):diffusealpha(0.5)
+		end,
+		BoogieStatsCommand=function(self)
+			self:Load(style_background[0])
+		end,
+		BoogieStatsEXCommand=function(self)
+			self:Load(style_background[1])
 		end,
 		LoopScoreboxCommand=function(self)
 			if cur_style == 0 or cur_style == 1 then
@@ -368,7 +411,7 @@ local af = Def.ActorFrame{
 			self:diffusealpha(0.3):x(2):y(-5)
 		end,
 		LoopScoreboxCommand=function(self)
-			if cur_style == 1 then
+			if (cur_style == 1 and not SL["P"..n].ActiveModifiers.EXScoring) or (cur_style == 0 and SL["P"..n].ActiveModifiers.EXScoring) then
 				self:sleep(transition_seconds/2):linear(transition_seconds/2):diffusealpha(0.3)
 			else
 				self:linear(transition_seconds/2):diffusealpha(0)
@@ -377,7 +420,7 @@ local af = Def.ActorFrame{
 	},
 	-- SRPG Logo
 	Def.Sprite{
-		Texture=THEME:GetPathG("", "SRPG8"),
+		Texture=style_background[2],
 		Name="SRPG8Logo",
 		InitCommand=function(self)
 			self:diffusealpha(0.4):zoom(0.03):diffusealpha(0)
@@ -392,7 +435,7 @@ local af = Def.ActorFrame{
 	},
 	-- ITL Logo
 	Def.Sprite{
-		Texture=THEME:GetPathG("", "ITL.png"),
+		Texture=style_background[3],
 		Name="ITLLogo",
 		InitCommand=function(self)
 			self:diffusealpha(0.2):zoom(0.45):diffusealpha(0)

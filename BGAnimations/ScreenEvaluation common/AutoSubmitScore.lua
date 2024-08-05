@@ -144,8 +144,6 @@ local AutoSubmitRequestProcessor = function(res, overlay)
     local data = JsonDecode(res.body)
     for i = 1, 2 do
         local playerStr = "player"..i
-        local entryNum = 1
-        local rivalNum = 1
 
         if data and data[playerStr] then
             local steps = GAMESTATE:GetCurrentSteps("PlayerNumber_P"..i)
@@ -167,26 +165,34 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                     end
                 end
 
-                if data[playerStr]["isRanked"] then
-                    -- call command for gs leaderboard panes to show
-                    if loweraf:GetChild("GSLeaderboard") then
-                        loweraf:GetChild("GSLeaderboard"):playcommand("AddGSLeaderboard",
-                            data[playerStr]["gsLeaderboard"])
-                    end
-                    if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
-                        loweraf2:GetChild("GSLeaderboard2"):playcommand("AddGSLeaderboard",
-                            data[playerStr]["gsLeaderboard"])
-                    end
+                -- call command for gs leaderboard panes to show
+                if loweraf:GetChild("GSLeaderboard") then
+                    loweraf:GetChild("GSLeaderboard"):playcommand("AddGSLeaderboard",
+                        data[playerStr]["gsLeaderboard"])
+                end
+                if loweraf2 and loweraf2:GetChild("GSLeaderboard2") then
+                    loweraf2:GetChild("GSLeaderboard2"):playcommand("AddGSLeaderboard",
+                        data[playerStr]["gsLeaderboard"])
+                end
 
-                    -- wr stuff
-                    if data[playerStr]["result"] ~= "score-not-improved" then
-                        for gsEntry in ivalues(data[playerStr]["gsLeaderboard"]) do
-                            if gsEntry["isSelf"] and gsEntry["rank"] == 1 then
-                                -- in the event both leaderboards return a self rank of 1, player 2 is
-                                -- more "up to date" so just take the highest player that received it
-                                wrplr = i
-                                break
-                            end
+                -- call command for ex leaderboard panes to show
+                if loweraf:GetChild("GSLeaderboardEX") then
+                    loweraf:GetChild("GSLeaderboardEX"):playcommand("AddEXLeaderboard",
+                        data[playerStr]["exLeaderboard"])
+                end
+                if loweraf2 and loweraf2:GetChild("GSLeaderboardEX2") then
+                    loweraf2:GetChild("GSLeaderboardEX2"):playcommand("AddEXLeaderboard",
+                        data[playerStr]["exLeaderboard"])
+                end
+
+                -- wr stuff
+                if data[playerStr]["result"] ~= "score-not-improved" then
+                    for gsEntry in ivalues(data[playerStr]["gsLeaderboard"]) do
+                        if gsEntry["isSelf"] and gsEntry["rank"] == 1 then
+                            -- in the event both leaderboards return a self rank of 1, player 2 is
+                            -- more "up to date" so just take the highest player that received it
+                            wrplr = i
+                            break
                         end
                     end
                 end

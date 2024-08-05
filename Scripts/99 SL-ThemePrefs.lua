@@ -162,6 +162,12 @@ SL_CustomPrefs.Get = function()
 			Values  = { true, false }
 		},
 
+		UseBoogieStats = {
+			Default = false,
+			Choices = { THEME:GetString("ThemePrefs", "Yes"), THEME:GetString("ThemePrefs", "No") },
+			Values = { true, false }
+		},
+
 		AutoDownloadUnlocks = {
 			Default = true,
 			Choices =  { THEME:GetString("ThemePrefs","Yes"), THEME:GetString("ThemePrefs", "No") },
