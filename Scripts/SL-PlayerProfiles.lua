@@ -13,6 +13,7 @@ local profile_whitelist = {
 	Mini = "string",
 	NoteSkin = "string",
 	JudgmentGraphic = "string",
+    HeldGraphic = "string",
 	EarlyLate = "string",
 	EarlyLateColor = "string",
 	BackgroundFilter = "string",

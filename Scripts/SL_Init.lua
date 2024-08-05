@@ -7,6 +7,7 @@ local PlayerDefaults = {
 				SpeedModType = "M",
 				SpeedMod = 250,
 				JudgmentGraphic = "Optimus Dark 1x7 (doubleres).png",
+                HeldGraphic = "None",
 				NoteSkin = nil,
 				Mini = "0%",
 				BackgroundFilter = "Off",

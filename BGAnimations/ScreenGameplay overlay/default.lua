@@ -32,7 +32,7 @@ for player in ivalues( GAMESTATE:GetHumanPlayers() ) do
 
 	af[#af+1] = LoadActor("./TrackTimeSpentInGameplay.lua", player)
 	af[#af+1] = LoadActor("./DetailedJudgmentTracking.lua", player)
-	
+	af[#af+1] = LoadActor("./PerColumnJudgmentGraphics.lua", player)
 	af[#af+1] = LoadActor("./MineCount.lua", player)
 	
 	-- FIXME: refactor PerColumnJudgmentTracking to not be inside this loop

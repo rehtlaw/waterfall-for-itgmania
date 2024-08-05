@@ -190,7 +190,7 @@ local Overrides = {
 				if list[i] then mods.NoteSkin = val; break end
 			end
 			-- Broadcast a message that ./Graphics/OptionRow Frame.lua will be listening for so it can change the NoteSkin preview
-			MESSAGEMAN:Broadcast('NoteSkinChanged', {Player=pn, NoteSkin=mods.NoteSkin})
+            MESSAGEMAN:Broadcast("RefreshActorProxy", {Player=pn, Name="NoteSkin", Value=mods.NoteSkin})
 			playeroptions:NoteSkin( mods.NoteSkin )
 		end
 	},
@@ -211,7 +211,21 @@ local Overrides = {
 			if (mods.SimulateITGEnv) and name ~= "None" then
 				name = name.."_ITG"
 			end
-			MESSAGEMAN:Broadcast("JudgmentGraphicChanged", {Player=pn, JudgmentGraphic=StripSpriteHints(name)})
+            MESSAGEMAN:Broadcast("RefreshActorProxy", {Player=pn, Name="JudgmentGraphic", Value=StripSpriteHints(name)})
+		end
+	},
+	HeldGraphic = {
+		LayoutType = "ShowOneInRow",
+		ExportOnChange = true,
+		Choices = function() return map(StripSpriteHints, GetHeldMissGraphics()) end,
+		Values = function() return GetHeldMissGraphics() end,
+		SaveSelections = function(self, list, pn)
+			local mods = SL[ToEnumShortString(pn)].ActiveModifiers
+			for i, val in ipairs(self.Values) do
+				if list[i] then mods.HeldGraphic = val; break end
+			end
+			-- Broadcast a message that ./Graphics/OptionRow Frame.lua will be listening for so it can change the Judgment preview
+			MESSAGEMAN:Broadcast("RefreshActorProxy", {Player=pn, Name="HeldGraphic", Value=StripSpriteHints(mods.HeldGraphic)})
 		end
 	},
 	-------------------------------------------------------------------------

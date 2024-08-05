@@ -71,47 +71,69 @@ t[#t+1] = Def.Quad {
 -- If the parent OptionRow's name is "NoteSkin" or "JudgmentGraphic" or "ComboFont", we leave it drawing and allow different Message commands
 -- broadcast from ./Scripts/SL-PlayerOptoions.lua to make this generic ActorProxy look like a NoteSkin or a JudgementGraphic or a ComboFont.
 
+local rows_with_proxies = { "NoteSkin", "JudgmentGraphic", "HeldGraphic", "ComboFont", "HoldJudgment", "MusicRate" }
+
 for player in ivalues( GAMESTATE:GetHumanPlayers() ) do
 	local pn = ToEnumShortString(player)
 
-	t[#t+1] = Def.ActorProxy{
-		Name="OptionRowProxy" ..pn,
+	local proxy = Def.ActorProxy{
+		Name="VisualActorProxy" .. pn,
 		OnCommand=function(self)
 			local optrow = self:GetParent():GetParent():GetParent()
 
-			if optrow:GetName()=="NoteSkin" or optrow:GetName()=="JudgmentGraphic" then
+			if FindInTable(optrow:GetName(), rows_with_proxies) then
 				-- if this OptionRow needs an ActorProxy for preview purposes, set the necessary parameters
-				self:x(player==PLAYER_1 and WideScale(20, 0) or WideScale(220, 240)):zoom(0.4)
-					-- What was my reasoning for diffusing in after 0.01? It seems unnecessary.
-					-- I don't remember but am afraid to remove it.
-					:diffusealpha(0):sleep(0.01):diffusealpha(1)
-
+				self:x((player==PLAYER_1 and WideScale(20, 0) or WideScale(220, 240)))
+				self:zoom(0.4)
 			else
 				-- if this OptionRow doesn't need an ActorProxy, don't draw it and save processor cycles
 				self:hibernate(math.huge)
 			end
 		end,
-		-- NoteSkinChanged is broadcast by the SaveSelections() function for the NoteSkin OptionRow definition
-		-- in ./Scripts/SL-PlayerOptions.lua
-		NoteSkinChangedMessageCommand=function(self, params)
-			local optrow = self:GetParent():GetParent():GetParent()
-
-			if optrow and optrow:GetName() == "NoteSkin" and player == params.Player then
-				-- attempt to find the hidden NoteSkin actor added by ./BGAnimations/ScreenPlayerOptions overlay.lua
-				local noteskin_actor = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("NoteSkin_"..params.NoteSkin)
-				-- ensure that that NoteSkin actor exists before attempting to set it as the target of this ActorProxy
-				if noteskin_actor then self:SetTarget( noteskin_actor ) end
-			end
-		end,
-		JudgmentGraphicChangedMessageCommand=function(self, params)
-			local optrow = self:GetParent():GetParent():GetParent()
-
-			if optrow and optrow:GetName() == "JudgmentGraphic" and player == params.Player then
-				local judgment_sprite = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("JudgmentGraphic_"..params.JudgmentGraphic)
-				if judgment_sprite then self:SetTarget( judgment_sprite ) end
-			end
-		end
 	}
+
+	-- RefreshActorProxy is broadcast by SaveSelections() for various OptionRow definitions
+	-- in ./Scripts/SL-PlayerOptions.lua
+	proxy.RefreshActorProxyMessageCommand=function(self, params)
+		if player ~= params.Player then return end
+		if not (params.Name and params.Value) then return end
+
+		local optrow = self:GetParent():GetParent():GetParent()
+		if optrow and optrow:GetName() == params.Name then
+
+			local offscreen_actor_name
+			if params.Name=="ComboFont" or params.Name=="MusicRate" then
+				-- the BitmapTexts for ComboFont and MusicRate helper text need to be able to
+				-- display different values per-player, so I prefixed the relevant Actors in
+				--     ./BGA/ScreenPlayerOptions overlay/OptionRowPreviews/ComboFont.lua
+				--     ./BGA/ScreenPlayerOptions overlay/OptionRowPreviews/MusicRate.lua
+				-- with "P1_" or "P2_"
+				offscreen_actor_name = ("%s_%s_%s"):format(pn, params.Name, params.Value)
+			else
+				offscreen_actor_name = ("%s_%s"):format(params.Name, params.Value)
+			end
+
+			-- attempt to find the offscreen actor added by ./BGAnimations/ScreenPlayerOptions overlay.lua
+			local offscreen_actor = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild(offscreen_actor_name)
+			-- ensure that that actor exists before attempting to set it as the target of this ActorProxy
+			if offscreen_actor then self:SetTarget( offscreen_actor ) end
+		end
+	end
+
+	proxy.RefreshBPMRangeMessageCommand=function(self, params)
+		local optrow = self:GetParent():GetParent():GetParent()
+		if optrow and optrow:GetName() ~= "MusicRate" then return end
+		if #GAMESTATE:GetHumanPlayers() <= 1 then
+			self:visible(false)
+			return
+		end
+
+		-- only show the MusicRate actorproxy when both players are joined
+		-- and split BPMs are in effect
+		self:visible( params[1] ~= params[2] )
+	end
+
+	table.insert(t, proxy)
 end
 
 return t

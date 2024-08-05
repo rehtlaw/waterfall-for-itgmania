@@ -179,6 +179,7 @@ local t = Def.ActorFrame{
 -- and referred to as needed via ActorProxy in ./Graphics/OptionRow Frame.lua
 LoadActor("./NoteSkinPreviews.lua", t)
 LoadActor("./JudgmentGraphicPreviews.lua", t)
+LoadActor("./HeldGraphic.lua", t)
 
 -- some functionality needed in both PlayerOptions, PlayerOptions2, and PlayerOptions3
 t[#t+1] = LoadActor(THEME:GetPathB("ScreenPlayerOptions", "common"))
