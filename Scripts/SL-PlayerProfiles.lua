@@ -47,6 +47,8 @@ local profile_whitelist = {
 	--MissBecauseHeld = "boolean",
 	NPSGraphAtTop = "boolean",
 
+    ErrorBarCap = "number",
+
 	ReceptorArrowsPosition = "string",
 
 	PlayerOptionsString = "string",
@@ -63,12 +65,12 @@ local profile_whitelist = {
 	PreferredFaultWindow = "number",
 	GSOverride = "boolean",
     AlwaysGS = "boolean",
-	
+
 	-- Waterfall expanded stuff
 	catJAM = "boolean",
 	StepInfo = "boolean",
 	Groovestats = "boolean",
-	TimeElapsed = "boolean",	
+	TimeElapsed = "boolean",
 
 	GIF = "string",
 	GIFResponsive = "boolean",

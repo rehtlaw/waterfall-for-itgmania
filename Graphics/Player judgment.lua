@@ -76,6 +76,8 @@ local af = Def.ActorFrame{
 			if TNSToUse == "TapNoteScore_W1" and threshold > 0 and math.abs(TNO) > threshold then
 				if sprite:GetNumStates() == 14 then
 					if param.Early then frame = 2 else frame = 3 end
+                elseif sprite:GetNumStates() == 7 then
+                    frame = 1
 				end
 			end
 
