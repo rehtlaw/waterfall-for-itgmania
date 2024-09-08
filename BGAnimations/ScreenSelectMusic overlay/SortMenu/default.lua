@@ -395,6 +395,12 @@ local t = Def.ActorFrame {
 		-- Reload songs, feature for ITGmania only
 		table.insert(wheel_options, {"TakeABreather", "LoadNewSongs"})
 
+		-- Only display the View Downloads option if we're connected to
+		-- GrooveStats, and that Auto-Downloads are enabled.
+		if SL.GrooveStats.IsConnected and ThemePrefs.Get("AutoDownloadUnlocks") then
+			table.insert(wheel_options, {"NeedMoreRam", "ViewDownloads"})
+		end
+
 		if not GAMESTATE:IsCourseMode() then
 			if ThemePrefs.Get("KeyboardFeatures") then				
 				-- Only display this option if keyboard features are enabled

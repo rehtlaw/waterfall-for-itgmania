@@ -48,6 +48,10 @@ local function input(event)
 				-- set it in the engine
 				GAMESTATE:SetCurrentStyle(new_style)
 
+				-- Make sure we cancel the request if it's active before trying to switch screens.
+				-- This prevents the "Stale ActorFrame" error.
+				overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
+
 				-- finally, reload the screen
 				screen:SetNextScreenName("ScreenReloadSSM")
 				screen:StartTransitioningScreen("SM_GoToNextScreen")
@@ -65,9 +69,15 @@ local function input(event)
 				elseif focus.new_overlay == "LoadNewSongs" then
 					-- Make sure we cancel the request if it's active before trying to switch screens.
 					-- This prevents the "Stale ActorFrame" error.
-					--overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
+					overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
 					overlay:playcommand("DirectInputToEngine")
 					SCREENMAN:SetNewScreen("ScreenReloadSongsSSM")
+				elseif focus.new_overlay == "ViewDownloads" then
+					-- Make sure we cancel the request if it's active before trying to switch screens.
+					-- This prevents the "Stale ActorFrame" error.
+					--overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
+					overlay:playcommand("DirectInputToEngine")
+					SCREENMAN:SetNewScreen("ScreenViewDownloads")
 				elseif focus.new_overlay == "AddFavorite" then
 					addOrRemoveFavorite(event.PlayerNumber)
 					-- Nudge the wheel a bit so that that the icon is correctly updated.
