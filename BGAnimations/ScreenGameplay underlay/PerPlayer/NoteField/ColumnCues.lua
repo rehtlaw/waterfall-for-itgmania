@@ -7,6 +7,10 @@ if not mods.ColumnCues then return end
 local playerState = GAMESTATE:GetPlayerState(player)
 local columnCues = SL[pn].Streams.ColumnCues
 
+local columnMapping = GetColumnMapping(player)
+-- Disable column cues if we couldn't compute valid columnMapping
+if columnMapping == nil then return end
+
 local numColumns = GAMESTATE:GetCurrentStyle():ColumnsPerPlayer()
 local style = GAMESTATE:GetCurrentStyle(player)
 local width = style:GetWidth(player)
@@ -55,7 +59,7 @@ local Update = function(self, delta)
 			-- Make sure there's still something to display after any potential scaling.
 			if scaledDuration > 2 * fadeTime then
 				for col_mine in ivalues(columnCue.columns) do
-					local col = col_mine.colNum
+					local col = columnMapping[col_mine.colNum]
 					local isMine = col_mine.isMine
 					self:GetChild("Column"..col):playcommand("Flash", {
 						duration=scaledDuration,
@@ -79,11 +83,22 @@ local af = Def.ActorFrame{
 		self:SetUpdateFunction(Update)
 	end,
 	CurrentSongChangedMessageCommand=function(self)
-		playerState = GAMESTATE:GetPlayerState(player)
-		columnCues = SL[pn].Streams.ColumnCues
-		curIndex = 1
-		updatedFirstTime = false
-		self:queuecommand("SetUpdate")
+		-- If available, use the new Steps::GetColumnCues() method
+		local currentSteps = GAMESTATE:GetCurrentSteps(player)
+		if currentSteps["GetColumnCues"] ~= nil then
+		Trace("Using currentSteps:GetColumnCues")
+			if currentSteps  then
+				columnCues = currentSteps:GetColumnCues(SL.Global.ColumnCueMinTime)
+				curIndex = 1
+				updatedFirstTime = false
+			end
+		else
+			-- Fallback
+			Trace("Using ColumnCues fallback")
+			columnCues = SL[pn].Streams.ColumnCuesStreams.ColumnCues
+			curIndex = 1
+			updatedFirstTime = false
+		end
 	end
 }
 
