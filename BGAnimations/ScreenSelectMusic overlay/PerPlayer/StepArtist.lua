@@ -243,6 +243,12 @@ local af = Def.ActorFrame{
                     self:visible(true)
                 end
             end,
+            SetTechTextMessageCommand = function(self, arg)
+                if arg.PlayerNumber == player then self:visible(false) end
+            end,
+            SetInfoTextMessageCommand = function(self, arg)
+                if arg.PlayerNumber == player then self:visible(true) end
+            end,
             OffCommand = function(self)
                 leaving_screen = true
                 self:stoptweening()
