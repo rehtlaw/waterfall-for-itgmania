@@ -96,12 +96,12 @@ for player in ivalues(Players) do
 
 	-- initialize dual pane view logic
 	if #Players == 1 then
-		local removepanes = (SL["P"..pn].ActiveModifiers.SimulateITGEnv) and WF.WFCentricPanes or WF.ITGCentricPanes
-		for name in ivalues(removepanes) do
-			if FindInTable(name, PaneNames) then
-				table.remove(PaneNames, FindInTable(name, PaneNames))
-			end
-		end
+-- 		local removepanes = (SL["P"..pn].ActiveModifiers.SimulateITGEnv) and WF.WFCentricPanes or WF.ITGCentricPanes
+-- 		for name in ivalues(removepanes) do
+-- 			if FindInTable(name, PaneNames) then
+-- 				table.remove(PaneNames, FindInTable(name, PaneNames))
+-- 			end
+-- 		end
 		local otherp = (pn == 1) and 2 or 1
 		WF.DefaultPane[otherp] = WF.DefaultSecPane
 		WF.EvalPanes[otherp] = WF.EvalSecPanes
