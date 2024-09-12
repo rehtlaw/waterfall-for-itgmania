@@ -61,6 +61,32 @@ local af = Def.ActorFrame{
 	OffCommand=function(self) self:linear(0.5):diffusealpha(0) end,
 }
 
+local InputHandler = function( event )
+
+	-- if (somehow) there's no event, bail
+	if not event then return end
+
+	if event.type == "InputEventType_FirstPress" then
+
+		Trace(event.DeviceInput.button)
+
+		if event.DeviceInput.button == "DeviceButton_1" then
+			SCREENMAN:SetNewScreen("ScreenTestReflex")
+		elseif event.DeviceInput.button == "DeviceButton_2" then
+			SCREENMAN:SetNewScreen("ScreenTestReflex2")
+		end
+
+	end
+
+end
+
+af[#af+1] = Def.Actor {
+	OnCommand=function()
+		local screen = SCREENMAN:GetTopScreen()
+		screen:AddInputCallback( InputHandler )
+	end
+}
+
 -- WF logo
 af[#af+1] = LoadActor(THEME:GetPathG("", "_logos/WFLogo.png"))..{
 	InitCommand=function(self) self:y(-80):zoom((SCREEN_WIDTH*2/3)/1486):shadowlength(0.75) end,

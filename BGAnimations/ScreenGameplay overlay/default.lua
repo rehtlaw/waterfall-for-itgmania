@@ -57,6 +57,6 @@ local buttonpresses = Def.ActorFrame{
 
 af[#af+1] = buttonpresses
 
-
+af[#af+1] = LoadActor("./ReflexLights.lua")
 
 return af
