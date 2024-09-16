@@ -60,7 +60,7 @@ local Update = function(self, delta)
 			if scaledDuration > 2 * fadeTime then
 				for col_mine in ivalues(columnCue.columns) do
 					local col = columnMapping[col_mine.colNum]
-					local isMine = (col_mine.noteType == 4 and true or false)
+					local isMine = col_mine.noteType == 4
 					self:GetChild("Column"..col):playcommand("Flash", {
 						duration=scaledDuration,
 						isMine=isMine
