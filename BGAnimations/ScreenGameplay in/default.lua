@@ -79,8 +79,5 @@ af[#af+1] = LoadFont("_wendy small")..{
 	end
 }
 
--- Scene Switcher code
-af[#af+1] = LoadActor( THEME:GetPathB("", "_modules/SceneSwitcher.lua"), "Gameplay")
-
 
 return af

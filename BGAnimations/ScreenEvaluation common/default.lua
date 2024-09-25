@@ -787,8 +787,5 @@ t[#t+1] = LoadActor("./MenuOverlay.lua", {CourseUpscores = ustbl})
 -- Since this actor also spawns the RPG overlay it must go on top of everything else
 t[#t+1] = LoadActor("./AutoSubmitScore.lua")
 
--- Scene Switcher code
-t[#t+1] = LoadActor( THEME:GetPathB("", "_modules/SceneSwitcher.lua"), "Evaluation")
-
 
 return t

@@ -73,9 +73,6 @@ local t = Def.ActorFrame{
 	-- Song Search 
 	-- activated from the SortMenu
 	LoadActor("./SongSearch/default.lua"),
-
-	-- Scene Switcher code
-	LoadActor( THEME:GetPathB("", "_modules/SceneSwitcher.lua"), "MusicWheel")
 }
 
 return t
