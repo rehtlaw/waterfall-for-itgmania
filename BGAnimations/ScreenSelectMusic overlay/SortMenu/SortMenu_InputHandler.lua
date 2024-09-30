@@ -50,7 +50,7 @@ local function input(event)
 
 				-- Make sure we cancel the request if it's active before trying to switch screens.
 				-- This prevents the "Stale ActorFrame" error.
-				overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
+				--overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
 
 				-- finally, reload the screen
 				screen:SetNextScreenName("ScreenReloadSSM")
@@ -69,7 +69,7 @@ local function input(event)
 				elseif focus.new_overlay == "LoadNewSongs" then
 					-- Make sure we cancel the request if it's active before trying to switch screens.
 					-- This prevents the "Stale ActorFrame" error.
-					overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
+					--overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
 					overlay:playcommand("DirectInputToEngine")
 					SCREENMAN:SetNewScreen("ScreenReloadSongsSSM")
 				elseif focus.new_overlay == "ViewDownloads" then
