@@ -5,7 +5,7 @@ if args.sec then side = (player == PLAYER_1) and PLAYER_2 or PLAYER_1 end
 local pn = ToEnumShortString(player)
 
 local faplus = SL[pn].ActiveModifiers.FAPlus
-if faplus == 0 then faplus = false end
+if faplus == 0 then faplus = 0.015 end
 
 local tns_string = "TapNoteScore"
 

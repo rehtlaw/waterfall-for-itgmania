@@ -13,7 +13,7 @@ local num_mines = GAMESTATE:Env()["TotalMines" .. pn]
 local options = GAMESTATE:GetPlayerState(player):GetPlayerOptions("ModsLevel_Preferred")
 
 local faplus = SL[pn].ActiveModifiers.FAPlus
-if faplus == 0 then faplus = false end
+if faplus == 0 then faplus = 0.015 end
 
 -- FA+ stuff
 local blues = 0
@@ -102,7 +102,7 @@ for i=1,#TapNoteScores.Types do
 	}
 
 	-- FA+ number, if shown
-	if (showfaplus) and i == 1 then
+	if i == 1 then
 		t[#t+1] = Def.RollingNumbers{
 			Font="_ScreenEvaluation numbers",
 			InitCommand = function(self)
@@ -196,7 +196,7 @@ end
 
 
 -- FA+ percent
-if faplus then
+if true then
 	local totalj = pss:GetRadarPossible():GetValue("RadarCategory_TapsAndHolds")
 	local raw = (totalj > 0) and blues/totalj or 0
 	local s = string.format("%0.2f", math.floor(raw*10000)/100)
