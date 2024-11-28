@@ -7,7 +7,7 @@ local SecPaneNames = {"General", "GeneralITG", "PerPanel", "PerPanelITG", "Timin
 local playerstats = {}
 local iscourse = GAMESTATE:IsCourseMode()
 
-local InputHandler, RpgInputHandler, MenuInputHandler
+local InputHandler, EventInputHandler, MenuInputHandler
 
 -- keep track of panes using tables per player
 WF.EvalPanes = {}
@@ -133,12 +133,12 @@ local t = Def.ActorFrame{
 	-- and the number of panes there are to InputHandler.lua
 	OnCommand=function(self)
 		InputHandler = LoadActor("./InputHandler.lua", {af=self, num_panes=NumPanes})
-		RpgInputHandler = LoadActor("./RpgInputHandler.lua")
+		EventInputHandler = LoadActor("./EventInputHandler.lua")
 		MenuInputHandler = LoadActor("./MenuInputHandler.lua")
 		SCREENMAN:GetTopScreen():AddInputCallback(InputHandler)
 	end,
 	DirectInputToEngineCommand=function(self)
-		SCREENMAN:GetTopScreen():RemoveInputCallback(RpgInputHandler)
+		SCREENMAN:GetTopScreen():RemoveInputCallback(EventInputHandler)
 		SCREENMAN:GetTopScreen():RemoveInputCallback(MenuInputHandler)
 		SCREENMAN:GetTopScreen():AddInputCallback(InputHandler)
 
@@ -146,10 +146,10 @@ local t = Def.ActorFrame{
 			SCREENMAN:set_input_redirected(player, false)
 		end
 	end,
-	DirectInputToRpgHandlerCommand=function(self)
+	DirectInputToEventHandlerCommand=function(self)
 		SCREENMAN:GetTopScreen():RemoveInputCallback(InputHandler)
 		SCREENMAN:GetTopScreen():RemoveInputCallback(MenuInputHandler)
-		SCREENMAN:GetTopScreen():AddInputCallback(RpgInputHandler)
+		SCREENMAN:GetTopScreen():AddInputCallback(EventInputHandler)
 		
 		for player in ivalues(PlayerNumber) do
 			SCREENMAN:set_input_redirected(player, true)
@@ -157,7 +157,7 @@ local t = Def.ActorFrame{
 	end,
 	DirectInputToMenuCommand = function(self)
 		SCREENMAN:GetTopScreen():RemoveInputCallback(InputHandler)
-		SCREENMAN:GetTopScreen():RemoveInputCallback(RpgInputHandler)
+		SCREENMAN:GetTopScreen():RemoveInputCallback(EventInputHandler)
 		SCREENMAN:GetTopScreen():AddInputCallback(MenuInputHandler)
 
 		for player in ivalues(PlayerNumber) do
@@ -173,7 +173,7 @@ local t = Def.ActorFrame{
 
 	-- store some attributes of this playthrough of this song in the global SL table
 	-- for later retrieval on ScreenEvaluationSummary
-	LoadActor("./GlobalStorage.lua"),	
+	LoadActor("./GlobalStorage.lua"),
 }
 
 local EvalChanged = function(actor, args, pn, itg, sec)

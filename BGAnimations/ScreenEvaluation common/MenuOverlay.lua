@@ -56,14 +56,14 @@ local SelectionActions = {
         --    return false
         --end
         local overlay = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("ScreenEval Common")
-        overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):visible(true)
+        overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):visible(true)
        -- for p = 1, 2 do
        --     if WF.RPGData[p] then
        --         overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):GetChild("P"..p.."RpgAf")
        --         :playcommand("Show", {data = WF.RPGData[p]})
        --     end
        -- end
-        overlay:queuecommand("DirectInputToRpgHandler")
+        overlay:queuecommand("DirectInputToEventHandler")
         return true
     end
 	--["View ITL 2022 stats"] = function(pn)

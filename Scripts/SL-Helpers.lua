@@ -252,6 +252,12 @@ Border = function(width, height, bw)
 	}
 end
 
+
+SL_WideScale = function(AR4_3, AR16_9)
+	return clamp(scale( SCREEN_WIDTH, 640, 854, AR4_3, AR16_9 ), AR4_3, AR16_9)
+end
+
+
 -- -----------------------------------------------------------------------
 -- determines which timing_window an offset value (number) belongs to
 -- used by the judgment scatter plot and offset histogram in ScreenEvaluation

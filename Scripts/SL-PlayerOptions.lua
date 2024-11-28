@@ -482,9 +482,6 @@ local Overrides = {
 			-- or notefieldwidth and notefieldwidth > _screen.w/2 then
 			-- 	table.remove(choices, 2)
 			-- end
-			if notefieldwidth and notefieldwidth > _screen.w/2 then		
-				table.remove(choices, 2)								
-			end															
 			
 			return choices
 		end,

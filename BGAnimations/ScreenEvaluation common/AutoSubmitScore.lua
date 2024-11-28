@@ -120,8 +120,8 @@ local AttemptDownloads = function(res)
 end
 
 local AutoSubmitRequestProcessor = function(res, overlay)
-	local hasRpg = false
-	local showRpg = false
+	local hasEvent = false
+	local shouldDisplayOverlay = false
 	local rpgname
 
     local shouldDisplayOverlay = false
@@ -228,7 +228,7 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                 -- Zarzob
 
                 if data[playerStr]["rpg"] or data[playerStr]["itl"] then
-                    hasRpg = true
+                    hasEvent = true
                     --rpgname = data[playerStr]["rpg"]["name"]
                     WF.RPGData[i] = data[playerStr]["rpg"]
 
@@ -237,14 +237,14 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                         { "View Event stats", true })
                     overlay:GetChild("MenuOverlay"):queuecommand("Update")
 
-                    -- if itg mode, set showrpg flag
+                    -- if itg mode, set shouldDisplayOverlay flag
                     --if SL["P"..i].ActiveModifiers.SimulateITGEnv then
-                    showRpg = true
+                    shouldDisplayOverlay = true
                     --end
                 end
 
                 --if data[playerStr]["itl"] then
-                --	hasRpg = true
+                --	hasEvent = true
                 --	rpgname = data[playerStr]["itl"]["name"]
                 --	WF.RPGData[i] = data[playerStr]["itl"]
                 --
@@ -253,9 +253,9 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                 --	{ "View ITL 2022 stats", true })
                 --	overlay:GetChild("MenuOverlay"):queuecommand("Update")
                 --
-                --	-- if itg mode, set showrpg flag
+                --	-- if itg mode, set shouldDisplayOverlay flag
                 --	if SL["P"..i].ActiveModifiers.SimulateITGEnv then
-                --		showRpg = true
+                --		shouldDisplayOverlay = true
                 --	end
                 --end
             end
@@ -271,24 +271,23 @@ local AutoSubmitRequestProcessor = function(res, overlay)
         end
 
         if shownotif[i] then
-            local notifarg = ((hasRpg) and (not showRpg))
+            local notifarg = ((hasEvent) and (not shouldDisplayOverlay))
             overlay:GetChild("P"..i.."_AF_Upper"):GetChild("GSNotification")
             :playcommand("SetSuccess", {notifarg, rpgname})
         end
 
-        if showRpg then
-            local rpgAf = overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay")
-            :GetChild("P"..i.."RpgAf")
-            if rpgAf and res["data"]["player"..i] and res["data"]["player"..i]["rpg"] then
-                rpgAf:playcommand("Show", {data=res["data"]["player"..i]})
+        if shouldDisplayOverlay then
+            local eventAf = overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):GetChild("P"..i.."EventAf")
+            if eventAf and res["player"..i] and res["player"..i]["rpg"] then
+                eventAf:playcommand("Show", {data=res["player"..i]})
             end
         end
 
-        if showRpg then
-            local rpgAf = overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay")
-            :GetChild("P"..i.."RpgAf")
-            if rpgAf and res["data"]["player"..i] and res["data"]["player"..i]["itl"] then
-                rpgAf:playcommand("Show", {data=res["data"]["player"..i]})
+        if shouldDisplayOverlay then
+            local eventAf = overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay")
+            :GetChild("P"..i.."EventAf")
+            if eventAf and res["player"..i] and res["player"..i]["itl"] then
+                eventAf:playcommand("Show", {data=res["player"..i]})
             end
         end
 
@@ -296,9 +295,9 @@ local AutoSubmitRequestProcessor = function(res, overlay)
     end
 
     -- finally, if we determined to show rpg automatically, do that now
-    if showRpg then
-        overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):visible(true)
-        overlay:queuecommand("DirectInputToRpgHandler")
+    if shouldDisplayOverlay then
+        overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):visible(true)
+        overlay:queuecommand("DirectInputToEventHandler")
     end
 
     if ThemePrefs.Get("AutoDownloadUnlocks") then
@@ -645,6 +644,6 @@ local af = Def.ActorFrame {
 	}
 }
 
-af[#af+1] = LoadActor("./RpgOverlay.lua")
+af[#af+1] = LoadActor("./EventOverlay.lua")
 
 return af

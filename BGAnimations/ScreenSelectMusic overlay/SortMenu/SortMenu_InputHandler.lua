@@ -42,15 +42,14 @@ local function input(event)
 				-- Get the style we want to change to
 				local new_style = focus.change:lower()
 
-				-- accommodate techno game
-				if GAMESTATE:GetCurrentGame():GetName()=="techno" then new_style = new_style.."8" end
-
 				-- set it in the engine
 				GAMESTATE:SetCurrentStyle(new_style)
 
 				-- Make sure we cancel the request if it's active before trying to switch screens.
 				-- This prevents the "Stale ActorFrame" error.
-				--overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
+                if overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester") then
+				    overlay:GetChild("PaneDisplayMaster"):GetChild("GetScoresRequester"):playcommand("Cancel")
+                end
 
 				-- finally, reload the screen
 				screen:SetNextScreenName("ScreenReloadSSM")
