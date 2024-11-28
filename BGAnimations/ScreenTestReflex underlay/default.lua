@@ -10,7 +10,7 @@ local InputHandler = function( event )
 		if event.DeviceInput.button == "DeviceButton_3" then
 			if not reflexhelp_hidden then
 				REFLEX:Connect()
-				REFLEX:SetPanelThresholds(260,200,125,260)
+				REFLEX:SetPanelThresholds(260,200,140,260)
 				REFLEX:SetPanelCooldowns(60,60,60,60)
 			end
 		elseif event.DeviceInput.button == "DeviceButton_4" then
