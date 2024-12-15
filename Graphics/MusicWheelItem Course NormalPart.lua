@@ -22,11 +22,6 @@ local curdiff = {}
 
 local abbrevs = WF.ClearTypesShort
 local shortrate = nil
-if not IsUsingWideScreen() then
-	-- abbreviations are impossible to read with the smaller space, so use shorter ones
-	abbrevs = {"★","AC","SC","FC","H","C","E","F",""}
-	shortrate = "R"
-end
 
 -- clear types/grades
 for player in ivalues(players) do

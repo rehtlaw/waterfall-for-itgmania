@@ -9,10 +9,6 @@ local stepstype = ToEnumShortString(GAMESTATE:GetCurrentStyle():GetStepsType())
 local curdiff = {}
 
 local abbrevs = WF.ClearTypesShort
-if not IsUsingWideScreen() then
-	-- abbreviations are impossible to read with the smaller space, so use shorter ones
-	abbrevs = {"★","AC","SC","FC","H","C","E","F",""}
-end
 
 local af = Def.ActorFrame{
 	-- the MusicWheel is centered via metrics under [ScreenSelectMusic]; offset by a slight amount to the right here
