@@ -46,9 +46,9 @@ local PlayerDefaults = {
 				OffsetDisplay = false,
 
 				-- New step stats stuff
-				StepInfo = false,
+				StepInfo = true,
 				Groovestats = false,
-				TimeElapsed = false,
+				TimeElapsed = true,
 
 				-- waterfall/bistro options
 				SimulateITGEnv = false,
