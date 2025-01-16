@@ -252,7 +252,7 @@ SL = {
 			TimingWindowSecondsW3=0.050000,
 			TimingWindowSecondsW4=0.100000,
 			TimingWindowSecondsW5=0.160000,
-			TimingWindowSecondsHold=0.321500,
+			TimingWindowSecondsHold=0.300000,
 			TimingWindowSecondsMine=0.071500,
 			TimingWindowSecondsRoll=0.350000,
 
