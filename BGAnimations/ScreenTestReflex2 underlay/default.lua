@@ -84,13 +84,6 @@ local reflex_block_spatial = {
 	{}
 }
 
-local function the_clamp(val,min,max)
-	if min > max then min,max = max,min end
-	if val > max then return max end
-	if val < min then return min end
-	return val
-end
-
 local function the_mod2(a, b)
 	return a - math.floor(a/b)*b;
 end
@@ -102,17 +95,17 @@ local function color_led(pan,x,y,r,g,b)
 	
 		--a:diffuse(r,g,b,1)
 		reflex_data[pan][a:getaux()+1] = {
-			math.floor(128*the_clamp(r,0,1)),
-			math.floor(128*the_clamp(g,0,1)),
-			math.floor(128*the_clamp(b,0,1))
+			math.floor(128*clamp(r,0,1)),
+			math.floor(128*clamp(g,0,1)),
+			math.floor(128*clamp(b,0,1))
 		}
 		--todo writelight color correction, pow,2 intensity
 		--REFLEX:SetLightData(0,pan-1,a:getaux(),128*math.clamp(r,0,1),128*math.clamp(g,0,1),128*math.clamp(b,0,1))
 		
 		--reflex_block_spatial[pan][y][x] = color(r..","..g..","..b..",1")
-		reflex_block_spatial[pan][y][x]:diffuse(the_clamp(r,0,1),the_clamp(g,0,1),the_clamp(b,0,1),1)
+		reflex_block_spatial[pan][y][x]:diffuse(clamp(r,0,1),clamp(g,0,1),clamp(b,0,1),1)
 		
-		WriteLED(0,pan-1,a:getaux(),{0.5*the_clamp(r,0,1),0.5*the_clamp(g,0,1),0.5*the_clamp(b,0,1)})
+		WriteLED(0,pan-1,a:getaux(),{0.5*clamp(r,0,1),0.5*clamp(g,0,1),0.5*clamp(b,0,1)})
 		
 	end
 end
@@ -316,7 +309,7 @@ t[#t+1] = Def.Actor {
 				local rad = (uptime)-math.floor(uptime)
 				local brt2 = math.mod((math.sqrt((y-6.5)*(y-6.5)+(x-6.5)*(x-6.5)))/6 + 1 - rad,1)
 				
-				color_led(2,x,y,the_clamp(brt2,0,1),the_clamp(brt2*1.5,0,1),the_clamp(brt2*3,0,1))
+				color_led(2,x,y,clamp(brt2,0,1),clamp(brt2*1.5,0,1),clamp(brt2*3,0,1))
 				
 				
 				--RAINBOW
@@ -332,7 +325,7 @@ t[#t+1] = Def.Actor {
 				local pos4 = (uptime-math.floor(uptime))
 				pos4 = 14*outCubic(pos4,0,1,1) --float position
 				
-				local bval4 = reflex_arrowkun[y][the_clamp(math.floor(the_mod2((x-1)-pos4,14))+1,1,14)]
+				local bval4 = reflex_arrowkun[y][clamp(math.floor(the_mod2((x-1)-pos4,14))+1,1,14)]
 				
 				if bval4 <= 1 then
 					color_led(4,x,y,0,bval4,0)

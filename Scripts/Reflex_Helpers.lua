@@ -1,10 +1,3 @@
-local function clamp(val, min, max)
-	local ret = val
-	if ret < min then ret = min end
-	if ret > max then ret = max end
-	return ret
-end
-
 function hardware_readPressureNormalizedPersonal(min,max)
 	local pressure = {}
 	

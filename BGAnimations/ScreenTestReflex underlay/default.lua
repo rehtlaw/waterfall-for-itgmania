@@ -29,7 +29,7 @@ local InputHandler = function( event )
 		elseif event.DeviceInput.button == "DeviceButton_8" then
 			--if not reflexhelp_hidden then SCREENMAN:SetNewScreen('ScreenSelectMusic') end
 		elseif event.DeviceInput.button == "DeviceButton_enter" then
-			SCREENMAN:SetNewScreen('ScreenSelectProfile') 
+			SCREENMAN:SetNewScreen('ScreenSelectProfile')
 		end
 
 	end
@@ -96,13 +96,6 @@ local function addbar(obj)
 	v4:y(50)
 	v4:zoom(.4)
 
-end
-
-function math.clamp(val,min,max)
-	if min > max then min,max = max,min end
-	if val > max then return max end
-	if val < min then return min end
-	return val
 end
 
 function math.mod2(a, b)
@@ -213,7 +206,7 @@ t[#t+1] = Def.Actor {
 				settexti(i,4,bar_max[i+1]-REFLEX:GetPanelBaseline(i))
 
 				local val = math.floor(4000*pressure[i+1]/sens[i+1])
-				REFLEX:SetLightArrow(0,i,math.clamp(255*val/5700,0,255)*0.1,0,math.clamp(255*val/5700,0,255)*0.2)
+				REFLEX:SetLightArrow(0,i,clamp(255*val/5700,0,255)*0.1,0,clamp(255*val/5700,0,255)*0.2)
 
 			end
 
