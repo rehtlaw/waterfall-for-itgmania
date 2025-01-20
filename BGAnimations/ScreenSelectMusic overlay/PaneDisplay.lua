@@ -21,9 +21,10 @@ end
 
 -- function to determine for some player ("P1"/"P2") whether the actors should be overridden by groovestats
 local UseGSScore = function(pn)
-	return SL.GrooveStats.IsConnected and (SL[pn].ApiKey ~= "")
-	and ((SL[pn].ActiveModifiers.SimulateITGEnv) or SL[pn].ActiveModifiers.AlwaysGS) and
-	((SL.Global.ActiveModifiers.MusicRate == 1.0) or SL[pn].ActiveModifiers.GSOverride)
+	-- return SL.GrooveStats.IsConnected and (SL[pn].ApiKey ~= "")
+	-- and ((SL[pn].ActiveModifiers.SimulateITGEnv) or SL[pn].ActiveModifiers.AlwaysGS) and
+	-- ((SL.Global.ActiveModifiers.MusicRate == 1.0) or SL[pn].ActiveModifiers.GSOverride)
+	return false
 end
 
 -- -----------------------------------------------------------------------
