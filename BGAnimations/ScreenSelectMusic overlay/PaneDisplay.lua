@@ -214,8 +214,7 @@ local PaneItems = {
 
 	-- second row
 	{ name=THEME:GetString("RadarCategory","Jumps"), rc='RadarCategory_Jumps'},
-	{ name=THEME:GetString("RadarCategory","Hands"), rc='RadarCategory_Hands'},
-	-- { name=THEME:GetString("RadarCategory","Lifts"), rc='RadarCategory_Lifts'},
+	{ name=THEME:GetString("RadarCategory","Lifts"), rc='RadarCategory_Lifts'},
 
 	-- third row
 	{ name=THEME:GetString("RadarCategory","Holds"), rc='RadarCategory_Holds'},
@@ -329,9 +328,9 @@ for player in ivalues(PlayerNumber) do
 		self:visible(GAMESTATE:IsHumanPlayer(player))
 
 		if player == PLAYER_1 then
-			self:x(_screen.w * 0.25 - 5)
+			self:x(_screen.w * 0.25 - 46)
 		elseif player == PLAYER_2 then
-			self:x(_screen.w * 0.75 + 5)
+			self:x(_screen.w * 0.75 + 100)
 		end
 
 		self:y(_screen.h - footer_height - pane_height)

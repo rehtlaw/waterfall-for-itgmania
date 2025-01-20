@@ -12,7 +12,11 @@ local iconh = 30
 
 local t = Def.ActorFrame{
 	Name="StepsDisplayList",
-	InitCommand=function(self) self:vertalign(top):xy(_screen.cx + WideScale(8, 8), _screen.cy - 26) end,
+	InitCommand=function(self)
+		self:xy(_screen.cx - 146, _screen.cy + 178) -- 178
+		self:rotationz(270)
+		self:zoomto(1.8, 1.8)
+	end,
 
 	OnCommand=function(self) self:queuecommand("RedrawStepsDisplay") end,
 	CurrentSongChangedMessageCommand=function(self)    self:queuecommand("RedrawStepsDisplay") end,
@@ -64,7 +68,8 @@ local t = Def.ActorFrame{
 	Def.Quad{
 		Name="Background",
 		InitCommand=function(self)
-			self:diffuse(color("#1e282f")):zoomto(iconw + 4, iconh * num_icons + 2 * (num_icons - 1) + 4)
+			self:diffuse(color("#1e282f"))
+				:zoomto(iconw + 4, iconh * num_icons + 2 * (num_icons - 1) + 4)
 				:vertalign("top")
 		end
 	},
@@ -73,8 +78,11 @@ local t = Def.ActorFrame{
 	LoadFont("Common Normal")..{
 		Name = "EditArrow",
 		Text = "^",
-		InitCommand = function(self) self:y(iconh * num_icons + 2 * (num_icons - 1) + 6):rotationz(180)
-			:visible(false) end,
+		InitCommand = function(self)
+			self:y(iconh * num_icons + 2 * (num_icons - 1) + 6)
+				:rotationz(180)
+				:visible(false)
+			end,
 		RedrawStepsDisplayCommand = function(self)
 			self:visible(false)
 			local song = GAMESTATE:GetCurrentSong()
@@ -104,9 +112,14 @@ for IconNumber=1,num_icons do
 		Grid[#Grid+1] = Def.Quad{
 			Name = "CursorP"..i.."_"..IconNumber,
 			InitCommand = function(self)
-				self:y(IconNumber * (iconh + 2) - iconh/2):zoomto(iconw/2+2, iconh+2):diffuseshift()
-				:effectcolor1(PlayerColor("PlayerNumber_P"..i)):effectcolor2(Color.White)
-				:horizalign(i == 1 and "right" or "left")
+				self:y(IconNumber * (iconh + 2) - iconh/2)
+					:zoomto(iconw/2+2, iconh+2)
+					:diffuseshift()
+				  :effectcolor1(PlayerColor("PlayerNumber_P"..i))
+				  :effectcolor2(Color.White)
+				  -- :vertalign(i == 1 and "top" or "bottom")
+				  :horizalign(i == 1 and "right" or "left")
+					:rotationz(90)
 			end,
 			SetCommand = function(self, params)
 				local player = "PlayerNumber_P"..i
@@ -139,6 +152,7 @@ for IconNumber=1,num_icons do
 			self:y(IconNumber * (iconh + 2) - iconh/2)
 			self:zoom(0.5)
 			self:diffuse(0,0,0,1)
+			self:rotationz(90)
 		end,
 		SetCommand=function(self, params)
 			self:settext(params.Meter)
