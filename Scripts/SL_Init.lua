@@ -110,7 +110,11 @@ local PlayerDefaults = {
 				Stats = {}
 			}
 			self.PlayerOptionsString = nil
-
+			self.ITLData = {
+				["pathMap"] = {},
+				["hashMap"] = {},
+			}
+			
 			-- The Groovestats API key loaded for this player
 			self.ApiKey = ""
 			-- Whether or not the player is playing on pad.
