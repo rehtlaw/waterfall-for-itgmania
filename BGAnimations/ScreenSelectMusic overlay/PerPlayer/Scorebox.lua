@@ -656,7 +656,7 @@ local af = Def.ActorFrame({
 	}),
 	-- EX Text
 	Def.BitmapText({
-		Font = ThemePrefs.Get("ThemeFont") .. " Normal",
+		Font = "Common Normal",
 		Text = "EX",
 		InitCommand = function(self)
 			self:diffusealpha(0):x(2):y(-5)
@@ -764,7 +764,7 @@ for i = 1, NumEntries do
 			end,
 		})
 	else
-		af[#af + 1] = LoadFont(ThemePrefs.Get("ThemeFont") .. " Normal")
+		af[#af + 1] = LoadFont("Common Normal")
 			.. {
 				Name = "Rank" .. i,
 				Text = "",
@@ -807,7 +807,7 @@ for i = 1, NumEntries do
 			}
 	end
 
-	af[#af + 1] = LoadFont(ThemePrefs.Get("ThemeFont") .. " Normal")
+	af[#af + 1] = LoadFont("Common Normal")
 		.. {
 			Name = "Name" .. i,
 			Text = "",
@@ -849,7 +849,7 @@ for i = 1, NumEntries do
 			end,
 		}
 
-	af[#af + 1] = LoadFont(ThemePrefs.Get("ThemeFont") .. " Normal")
+	af[#af + 1] = LoadFont("Common Normal")
 		.. {
 			Name = "Score" .. i,
 			Text = "",
