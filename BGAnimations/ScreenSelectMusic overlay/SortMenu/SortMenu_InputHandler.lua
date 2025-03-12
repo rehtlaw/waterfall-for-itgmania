@@ -85,6 +85,9 @@ local function input(event)
 					screen:GetMusicWheel():Move(1)
 					screen:GetMusicWheel():Move(-1)
 					screen:GetMusicWheel():Move(0)
+				elseif focus.new_overlay == "PracticeMode" then
+					SCREENMAN:GetTopScreen():SetNextScreenName("ScreenPractice")
+					SCREENMAN:GetTopScreen():StartTransitioningScreen("SM_GoToNextScreen")
 				elseif focus.new_overlay == "Preferred" then
 					-- Only allow sorting by favorites if there are favorites available
 					if (#SL[ToEnumShortString(event.PlayerNumber)].Favorites > 0) then

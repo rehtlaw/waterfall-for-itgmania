@@ -400,6 +400,7 @@ local t = Def.ActorFrame {
 
         if GAMESTATE:GetCurrentSong() ~= nil then
             table.insert(wheel_options, {"ImLovinIt", "AddFavorite"})
+			table.insert(wheel_options, {"HardTime", "PracticeMode"})
         end
 
         for player in ivalues(GAMESTATE:GetHumanPlayers()) do
