@@ -755,9 +755,55 @@ local MaybeCopyFromOppositePlayer = function(pn, filename, stepsType, difficulty
 		return false
 	end
 end
-		
+
+local GetSMStats = function(steps, pn)
+	local NotesPerMeasure = steps:GetNotesPerMeasure(pn)
+	local PeakNPS = steps:GetPeakNPS(pn)
+	local NPSperMeasure = steps:GetNPSPerMeasure(pn)
+	local techCounts = steps:GetTechCounts(pn)
+
+	SL[pn].Streams.NotesPerMeasure = NotesPerMeasure
+	SL[pn].Streams.PeakNPS = PeakNPS
+	SL[pn].Streams.NPSperMeasure = NPSperMeasure
+
+	SL[pn].Streams.Crossovers = techCounts:GetValue( "TechCountsCategory_Crossovers" )
+	SL[pn].Streams.Footswitches = techCounts:GetValue( "TechCountsCategory_Footswitches" )
+	SL[pn].Streams.Sideswitches = techCounts:GetValue( "TechCountsCategory_Sideswitches" )
+	SL[pn].Streams.Jacks = techCounts:GetValue( "TechCountsCategory_Jacks" )
+	SL[pn].Streams.Brackets = techCounts:GetValue( "TechCountsCategory_Brackets" )
+end
+
 ParseChartInfo = function(steps, pn)
 	-- The filename for these steps in the StepMania cache 
+	local filename = steps:GetFilename()
+	-- StepsType, a string like "dance-single" or "pump-double"
+	local stepsType = ToEnumShortString( steps:GetStepsType() ):gsub("_", "-"):lower()
+	-- Difficulty, a string like "Beginner" or "Challenge"
+	local difficulty = ToEnumShortString( steps:GetDifficulty() )
+	-- An arbitary but unique string provided by the stepartist, needed here to identify Edit charts
+	local description = steps:GetDescription()
+
+	-- If we've copied from the other player then we're done.
+	if MaybeCopyFromOppositePlayer(pn, filename, stepsType, difficulty, description) then
+		return
+	end
+
+	-- Only parse the file if it's not what's already stored in SL Cache.
+	if (SL[pn].Streams.Filename ~= filename or
+			SL[pn].Streams.StepsType ~= stepsType or
+			SL[pn].Streams.Difficulty ~= difficulty or
+			SL[pn].Streams.Description ~= description) then
+		GetSMStats(steps, pn)
+
+		SL[pn].Streams.Filename = filename
+		SL[pn].Streams.StepsType = stepsType
+		SL[pn].Streams.Difficulty = difficulty
+		SL[pn].Streams.Description = description
+	end
+end
+
+OldParseChartInfo = function(steps, pn)
+	-- The filename for these steps in the StepMania cache
 	local filename = steps:GetFilename()
 	-- StepsType, a string like "dance-single" or "pump-double"
 	local stepsType = ToEnumShortString( steps:GetStepsType() ):gsub("_", "-"):lower()
