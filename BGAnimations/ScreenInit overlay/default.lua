@@ -20,6 +20,7 @@ af[#af+1] = Def.Quad{
 	OnCommand=function(self)
 		-- go to hash cache screen if needed #HashCash
 		if #WF.NewChartsToCache > 0 and (not UNSUPPORTED_VERSION) then
+			WF.HashCacheNextScreen = "ScreenInit"
 			SCREENMAN:SetNewScreen("ScreenBuildHashCache")
 		end
 		self:accelerate(0.3):zoomtoheight(128):diffusealpha(0.9):sleep(2.5)

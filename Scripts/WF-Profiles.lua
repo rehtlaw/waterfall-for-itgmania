@@ -2248,6 +2248,8 @@ end
 
 -- Hello, past me. It's now post release of version 0.5.0 and we're in dire need of some stored caching for the hashes.
 -- People really want those music wheel grades don't they...
+WF.HashCacheNextScreen = "ScreenInit"
+
 WF.InitHashCache = function()
     -- Call this on ScreenInit; it will check if the cache is empty, then load from file if it exists.
     -- It will then check for new uncached charts, and signal to generate those.

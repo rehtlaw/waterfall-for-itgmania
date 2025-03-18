@@ -1,13 +1,21 @@
 local statustext
+WF.InitHashCache()
 
 local t = Def.ActorFrame{
 	-- GameplayReloadCheck is a kludgy global variable used in ScreenGameplay in.lua to check
 	-- if ScreenGameplay is being entered "properly" or being reloaded by a scripted mod-chart.
 	-- If we're here in SelectMusic, set GameplayReloadCheck to false, signifying that the next
 	-- time ScreenGameplay loads, it should have a properly animated entrance.
-	InitCommand=function(self) 
+	InitCommand=function(self)
         SL.Global.GameplayReloadCheck = false
         generateFavoritesForMusicWheel()
+	end,
+
+	OnCommand=function(self)
+		if #WF.NewChartsToCache > 0 and (not UNSUPPORTED_VERSION) then
+			WF.HashCacheNextScreen = "ScreenSelectMusic"
+			SCREENMAN:SetNewScreen("ScreenBuildHashCache")
+		end
 	end,
 
 	PlayerProfileSetMessageCommand=function(self, params)
