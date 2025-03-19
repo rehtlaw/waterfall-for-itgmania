@@ -1,7 +1,9 @@
-local t = Def.Model {
-	Meshes=NOTESKIN:GetPath('_down','tap lift model');
-	Materials=NOTESKIN:GetPath('_down','tap lift model');
-	Bones=NOTESKIN:GetPath('_down','tap lift model');
+return Def.Sprite {
+	Texture=NOTESKIN:GetPath( '_Down', 'tap lift' );
+	Frames = Sprite.LinearFrames( 64, 2 );
+	OnCommand=function(self)
+		-- SM("Hello!")
+	end
 };
 
-return t;
+

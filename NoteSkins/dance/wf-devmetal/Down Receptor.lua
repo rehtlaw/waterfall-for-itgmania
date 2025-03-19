@@ -4,7 +4,7 @@
 
 local t = Def.ActorFrame {
 	Def.Sprite {
-		Texture=NOTESKIN:GetPath( '_down', 'Receptor Go' );
+		Texture=NOTESKIN:GetPath( '_down', 'Receptor tex' );
 		Frame0000=0;
 		Delay0000=1;
 		Frame0001=1;
@@ -24,17 +24,15 @@ local t = Def.ActorFrame {
 		W1Command=NOTESKIN:GetMetricA("ReceptorArrow", "W1Command");
 	};
 	Def.Sprite {
-		Texture=NOTESKIN:GetPath( '_down', 'Receptor Go' );
+		Texture=NOTESKIN:GetPath( '_down', 'Receptor tex' );
 		Frame0000=0;
-		Delay0000=0.25;
+		Delay0000=1;
 		Frame0001=1;
 		Delay0001=1;
 		Frame0002=2;
 		Delay0002=1;
 		Frame0003=3;
 		Delay0003=1;
-		Frame0004=0;
-		Delay0004=0,75;
 		InitCommand=cmd(blend,'BlendMode_Add';diffusealpha,0);
 		NoneCommand=NOTESKIN:GetMetricA("ReceptorArrow", "NoneCommand");
 		PressCommand=cmd(diffusealpha,0.2);
