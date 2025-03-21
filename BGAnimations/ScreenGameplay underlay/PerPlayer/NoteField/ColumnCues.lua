@@ -91,7 +91,10 @@ local af = Def.ActorFrame{
 			updatedFirstTime = false
 		end
 
-	end
+	end,
+	PlayingCommand=function(self)
+		curIndex = 1
+	end,
 }
 
 local IsReversedColumn = function(player, columnIndex)
