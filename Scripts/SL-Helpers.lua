@@ -82,7 +82,7 @@ StepManiaVersionIsSupported = function()
 	--SM(ProductID())
     -- outfox renamed away from 5.3 as of v0.4.14, if productID contains outfox we know it has full support
 	if type(ProductID) == "function" and ProductID():find("ITGmania") then 
-        return IsMinimumProductVersion(0, 8, 0)
+        return IsMinimumProductVersion(1, 0, 1)
     end
 end
 
