@@ -137,7 +137,7 @@ WF.GetITGJudgment = function(offset)
     return WF.ITGJudgments.Miss -- this should never happen but who knows
 end
 
-WF.TrackITGJudgment = function(pn, judgedata)
+WF.TrackITGJudgment = function(pn, judgedata, early)
     -- judgedata should be the params table from the JudgmentMessageCommand
     local iscourse = GAMESTATE:IsCourseMode()
 
@@ -181,28 +181,32 @@ WF.TrackITGJudgment = function(pn, judgedata)
     if j ~= -1 then
         -- most things we don't need to do if you've already failed
         if not WF.ITGFailed[pn] then
-            -- update dp first
-            WF.ITGDP[pn] = WF.ITGDP[pn] + weights[j]
-            if iscourse then WF.ITGDP_CurSongInCourse[pn] = WF.ITGDP_CurSongInCourse[pn] + weights[j] end
-            -- update max dp -- conveniently, both held and fantastic are +5, so we can increase it by 5 for any
-            -- judgment except HitMine :)
-            if j < 9 then
-                WF.ITGCurMaxDP[pn] = WF.ITGCurMaxDP[pn] + (j <= 6 and weights[WF.ITGJudgments.Fantastic] or weights[WF.ITGJudgments.Held])
-                if iscourse then
-                    WF.ITGCurMaxDP_CurSongInCourse[pn] = WF.ITGCurMaxDP_CurSongInCourse[pn] + weights[1]
+            if not early then
+                -- update dp first
+                WF.ITGDP[pn] = WF.ITGDP[pn] + weights[j]
+                if iscourse then WF.ITGDP_CurSongInCourse[pn] = WF.ITGDP_CurSongInCourse[pn] + weights[j] end
+                -- update max dp -- conveniently, both held and fantastic are +5, so we can increase it by 5 for any
+                -- judgment except HitMine :)
+                if j < 9 then
+                    WF.ITGCurMaxDP[pn] = WF.ITGCurMaxDP[pn] + (j <= 6 and weights[WF.ITGJudgments.Fantastic] or weights[WF.ITGJudgments.Held])
+                    if iscourse then
+                        WF.ITGCurMaxDP_CurSongInCourse[pn] = WF.ITGCurMaxDP_CurSongInCourse[pn] + weights[1]
+                    end
                 end
             end
 
             -- track judgments in table
-            local newlife = WF.UpdateLifeValue(pn, j)
-            local jd = WF.ITGJudgmentData[pn]
-            if iscourse then
-                jd = WF.ITGJudgmentData[pn][WF.CurrentSongInCourse]
-                WF.ITGJudgmentCountsPerSongInCourse[pn][WF.CurrentSongInCourse][j] =
-                    WF.ITGJudgmentCountsPerSongInCourse[pn][WF.CurrentSongInCourse][j] + 1
+            local newlife = WF.UpdateLifeValue(pn, j, judgedata.EarlyTapNoteScore)
+            if not early then
+                local jd = WF.ITGJudgmentData[pn]
+                if iscourse then
+                    jd = WF.ITGJudgmentData[pn][WF.CurrentSongInCourse]
+                    WF.ITGJudgmentCountsPerSongInCourse[pn][WF.CurrentSongInCourse][j] =
+                        WF.ITGJudgmentCountsPerSongInCourse[pn][WF.CurrentSongInCourse][j] + 1
+                end
+                table.insert(jd, { j, newlife, songtime })
+                WF.ITGJudgmentCounts[pn][j] = WF.ITGJudgmentCounts[pn][j] + 1
             end
-            table.insert(jd, { j, newlife, songtime })
-            WF.ITGJudgmentCounts[pn][j] = WF.ITGJudgmentCounts[pn][j] + 1
         end
 
         -- combo stuff
@@ -215,7 +219,7 @@ WF.TrackITGJudgment = function(pn, judgedata)
                 WF.ITGFCType_CurSongInCourse[pn] = j
             end
         else
-            if (j >= WF.ITGJudgments.Decent and j <= WF.ITGJudgments.Miss) or j == WF.ITGJudgments.Dropped then
+            if ((j >= WF.ITGJudgments.Decent and j <= WF.ITGJudgments.Miss) and not early) or j == WF.ITGJudgments.Dropped then
                 WF.ITGFCType[pn] = 4
                 WF.ITGFCType_CurSongInCourse[pn] = 4
                 if j ~= WF.ITGJudgments.Dropped then
@@ -230,15 +234,23 @@ WF.TrackITGJudgment = function(pn, judgedata)
     end
 end
 
-WF.UpdateLifeValue = function(pn, judgment)
+WF.UpdateLifeValue = function(pn, judgment, earlyTns)
     -- judgment should be the actual judgment index based on the table defined in this script
     --- ugh, you don't really realize how annoying this lifebar is until you're remaking it, do you
 
+    if earlyTns ~= nil then
+        local earlyTnsString = ToEnumShortString(earlyTns)
+        if earlyTnsString ~= "None" then
+            if judgment ~= 5 or judgment ~= 4 then
+                return WF.ITGLife[pn]
+            end
+        end
+    end
     -- if failed already, just return a 0
     if WF.ITGFailed[pn] then return 0 end
 
     local oldlife = WF.ITGLife[pn]
-    
+
     -- update regencombo first, then change life accordingly
     if WF.ITGLifeChanges[judgment] < 0 then
         WF.ITGRegenCombo[pn] = math.min(WF.ITGRegenCombo[pn]
@@ -424,7 +436,7 @@ WF.InitSongInCourse = function()
     if not GAMESTATE:IsCourseMode() then return end
     WF.CurrentSongInCourse = GAMESTATE:GetCourseSongIndex() + 1
     local players = GAMESTATE:GetHumanPlayers()
-    
+
     if WF.CurrentSongInCourse == 1 then
         -- stuff for only the first song
         WF.CurrentCourseStatsObjects = {}
@@ -505,7 +517,7 @@ WF.ConsolidateCourseStats = function()
             end
             toff = toff + trail:GetTrailEntry(dtind-1):GetSong():GetLastSecond()
         end
-        
+
         -- build stats object for full course
         local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
         local lifevals = WF.GetShortLifeBarTable(pn)
@@ -980,7 +992,7 @@ WF.TrackFAPlus = function(pn, judgedata)
 
 
 	if WF.ITGFailed[pn] then return end
-	
+
     -- Pass player number and params from JudgmentMessage into this
     -- exit under irrelevant conditions
     if not judgedata.TapNoteOffset then return end
