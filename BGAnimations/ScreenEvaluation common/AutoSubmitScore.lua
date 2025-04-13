@@ -230,10 +230,10 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                 if data[playerStr]["rpg"] or data[playerStr]["itl"] then
                     hasEvent = true
                     --rpgname = data[playerStr]["rpg"]["name"]
-                    WF.RPGData[i] = data[playerStr]["rpg"]
+                    WF.RPGData[i] = data[playerStr]
 
                     -- add option to L+R menu
-                    table.insert(WF.MenuSelections[i], 
+                    table.insert(WF.MenuSelections[i],
                         { "View Event stats", true })
                     overlay:GetChild("MenuOverlay"):queuecommand("Update")
 
@@ -278,16 +278,15 @@ local AutoSubmitRequestProcessor = function(res, overlay)
 
         if shouldDisplayOverlay then
             local eventAf = overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):GetChild("P"..i.."EventAf")
-            if eventAf and res["player"..i] and res["player"..i]["rpg"] then
-                eventAf:playcommand("Show", {data=res["player"..i]})
+            if eventAf and data["player"..i] and data["player"..i]["rpg"] then
+                eventAf:playcommand("Show", {data=data["player"..i]})
             end
         end
 
         if shouldDisplayOverlay then
-            local eventAf = overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay")
-            :GetChild("P"..i.."EventAf")
-            if eventAf and res["player"..i] and res["player"..i]["itl"] then
-                eventAf:playcommand("Show", {data=res["player"..i]})
+            local eventAf = overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):GetChild("P"..i.."EventAf")
+            if eventAf and data["player"..i] and data["player"..i]["itl"] then
+                eventAf:playcommand("Show", {data=data["player"..i]})
             end
         end
 

@@ -79,7 +79,7 @@ end
 -- Returns an actorframe that contains both the banner and the song title to
 -- be used in the event overlay.
 local BannerAndSong = function(x, y, zoom)
-	local af = Def.ActorFrame{ 
+	local af = Def.ActorFrame{
 		Name="BannerAndSong",
 		InitCommand=function(self) 
 			self:xy(x, y):zoom(zoom):vertalign("top") 
@@ -369,7 +369,7 @@ local GetItlPaneFunctions = function(eventAf, itlData, player)
 	local paneTexts = {}
 	local paneFunctions = {}
 	
-	local score = CalculateExScore(player)
+	local score = WF.GetEXScore(player)
 	local scoreDelta = itlData["scoreDelta"]/100.0
 
 	local steps = GAMESTATE:GetCurrentSteps(player)

@@ -290,8 +290,8 @@ local DataForSong = function(player, prevData)
 	local month = MonthOfYear()+1
 	local day = DayOfMonth()
 
-	local judgments = GetExJudgmentCounts(player)
-	local ex = CalculateExScore(player, judgments)
+	local judgments = WF.NewGetEXJudgmentCounts(player)
+	local ex = WF.GetEXScore(player)
 	local clearType = GetClearType(judgments)
 	local points = GetITLPointsForSong(passingPoints, maxScoringPoints, ex)
 	local usedCmod = GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred"):CMod() ~= nil
@@ -505,10 +505,7 @@ UpdateItlData = function(player)
 
 	-- We also require all the windows to be enabled.
 	-- ITG mode is the only mode that has all the windows enabled by default.
-	local allWindowsEnabled = SL.Global.GameMode == "ITG"
-	for enabled in ivalues(SL[pn].ActiveModifiers.TimingWindows) do
-		allWindowsEnabled = allWindowsEnabled and enabled
-	end
+	local allWindowsEnabled = SL[pn].ActiveModifiers.PreferredFaultWindow == 3
 
 	if (GAMESTATE:IsHumanPlayer(player) and
 				valid and

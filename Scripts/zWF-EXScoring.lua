@@ -55,11 +55,57 @@ WF.EXClearTypeColors = {
 	"#ffffff"
 }
 
-WF.GetEXJudgmentCounts = function(player)	
-	local pn = tonumber(player:sub(-1))	
+WF.NewGetEXJudgmentCounts = function(player)
+	local pn = tonumber(player:sub(-1))
+	local options = GAMESTATE:GetPlayerState(player):GetPlayerOptions("ModsLevel_Preferred")
+	local stats = STATSMAN:GetCurStageStats():GetPlayerStageStats(pn)
+	local StepsOrTrail = (GAMESTATE:IsCourseMode() and GAMESTATE:GetCurrentTrail(player)) or GAMESTATE:GetCurrentSteps(player)
 	
 	local judgments = {}
 	
+	local held 			= WF.ITGJudgmentCounts[pn][7]
+	local dropped		= WF.ITGJudgmentCounts[pn][8]
+	local mine 			= WF.ITGJudgmentCounts[pn][9]
+	
+	judgments["W0"] = WF.FAPlusCount[pn][3]
+	judgments["W1"] = WF.ITGJudgmentCounts[pn][1]- WF.FAPlusCount[pn][3]
+	judgments["W2"] = WF.ITGJudgmentCounts[pn][2]
+	judgments["W3"] = WF.ITGJudgmentCounts[pn][3]
+	judgments["W4"] = WF.ITGJudgmentCounts[pn][4]
+	judgments["W5"] = WF.ITGJudgmentCounts[pn][5]
+	judgments["Miss"] = WF.ITGJudgmentCounts[pn][6]
+	judgments["totalSteps"] = StepsOrTrail:GetRadarValues(player):GetValue("RadarCategory_TapsAndHolds")
+	local RadarCategory = { "Holds", "Mines", "Rolls" }
+	for RCType in ivalues(RadarCategory) do
+		local number = stats:GetRadarActual():GetValue( "RadarCategory_"..RCType )
+		local possible = StepsOrTrail:GetRadarValues(player):GetValue( "RadarCategory_"..RCType )
+
+		if RCType == "Mines" then
+			-- NoMines still report the total number of mines that exist in a chart, even if they weren't played in the chart.
+			-- If NoMines was set, report 0 for the number of mines as the chart actually didn't have any.
+			-- TODO(teejusb): Track AvoidMine in the future. This is fine for now as ITL compares serverside.
+			if options:NoMines() then
+				judgments[RCType] = 0
+				judgments["total"..RCType] = 0
+			else
+				-- We want to keep track of mines hit.
+				judgments[RCType] = possible - number
+				judgments["total"..RCType] = possible
+			end
+		else
+			judgments[RCType] = number
+			judgments["total"..RCType] = possible
+		end
+	end
+
+	return judgments
+end
+
+WF.GetEXJudgmentCounts = function(player)
+	local pn = tonumber(player:sub(-1))
+
+	local judgments = {}
+
 	local fantasticPlus	= WF.FAPlusCount[pn][3] -- Created [3] in 0.7.6
 	local fantastic		= WF.ITGJudgmentCounts[pn][1]- WF.FAPlusCount[pn][3]
 	local excellent 	= WF.ITGJudgmentCounts[pn][2]
@@ -70,7 +116,7 @@ WF.GetEXJudgmentCounts = function(player)
 	local held 			= WF.ITGJudgmentCounts[pn][7]
 	local dropped		= WF.ITGJudgmentCounts[pn][8]
 	local mine 			= WF.ITGJudgmentCounts[pn][9]
-	
+
 	table.insert(judgments,fantasticPlus)
 	table.insert(judgments,fantastic)
 	table.insert(judgments,excellent)
@@ -81,7 +127,7 @@ WF.GetEXJudgmentCounts = function(player)
 	table.insert(judgments,held)
 	table.insert(judgments,dropped)
 	table.insert(judgments,mine)
-	
+
 	return judgments
 end
 
@@ -139,7 +185,7 @@ WF.GetEXPercentDP = function(player, maxdp, incourse)
 end
 
 WF.GetEXScore = function(player)
-	return string.format("%.2f", WF.GetEXPercentDP(player)*100)	
+	return string.format("%.2f", WF.GetEXPercentDP(player)*100)
 end
 
 WF.EXClearTypeColor = function(ct)

@@ -57,12 +57,12 @@ local SelectionActions = {
         --end
         local overlay = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("ScreenEval Common")
         overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):visible(true)
-       -- for p = 1, 2 do
-       --     if WF.RPGData[p] then
-       --         overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):GetChild("P"..p.."RpgAf")
-       --         :playcommand("Show", {data = WF.RPGData[p]})
-       --     end
-       -- end
+        for p = 1, 2 do
+            if WF.RPGData[p] then
+                overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):GetChild("P"..p.."EventAf")
+                :playcommand("Show", {data = WF.RPGData[p]})
+            end
+        end
         overlay:queuecommand("DirectInputToEventHandler")
         return true
     end

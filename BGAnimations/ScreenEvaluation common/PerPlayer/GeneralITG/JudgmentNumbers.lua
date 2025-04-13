@@ -20,7 +20,7 @@ local blues = 0
 if faplus == 0.010 then
 	blues = WF.FAPlusCount[p][1]
 elseif faplus == 0.0125 then
-	blues = WF.FAPlusCount[p][2]	
+	blues = WF.FAPlusCount[p][2]
 elseif faplus == 0.015 then
 	--blues = pss:GetTapNoteScores("TapNoteScore_W1")
 	blues = WF.FAPlusCount[p][3]-- change to blue+white calculation in 0.7.6, Notes in WF-Scoring.lua	
