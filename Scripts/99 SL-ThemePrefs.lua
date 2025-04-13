@@ -90,20 +90,20 @@ SL_CustomPrefs.Get = function()
 		},
 		-- Used for Song Search feature
 		KeyboardFeatures = {
-			Default = false,
+			Default = true,
 			Choices =  { THEME:GetString("ThemePrefs","Yes"), THEME:GetString("ThemePrefs", "No") },
 			Values	= { true, false }
 		},
-        RescoreEarlyHits = {
-            Default = false,
-            Choices = { THEME:GetString("ThemePrefs", "Yes"), THEME:GetString("ThemePrefs", "No") },
-            Values = { true, false }
-        },
+    RescoreEarlyHits = {
+      Default = true,
+      Choices = { THEME:GetString("ThemePrefs", "Yes"), THEME:GetString("ThemePrefs", "No") },
+      Values = { true, false }
+    },
 		-- - - - - - - - - - - - - - - - - - - -
 		-- Enable/Disable Certain Screens
 		AllowScreenSelectProfile =
 		{
-			Default = false,
+			Default = true,
 			Choices = { THEME:GetString("ThemePrefs","Yes"), THEME:GetString("ThemePrefs", "No") },
 			Values 	= { true, false }
 		},
