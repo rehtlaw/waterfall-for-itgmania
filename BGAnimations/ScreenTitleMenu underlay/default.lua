@@ -1,5 +1,7 @@
 local TextColor = Color.White
 
+songsRandNum = math.random(6)
+
 -- generate a string like "7741 songs in 69 groups, 10 courses"
 local SongStats = ("%i %s %i %s, %i %s"):format(
 	SONGMAN:GetNumSongs(),
