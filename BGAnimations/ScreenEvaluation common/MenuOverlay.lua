@@ -50,7 +50,7 @@ local SelectionActions = {
     ["View Event stats"] = function(pn)
         -- we actually want to just show the overlay for both players if available, since 2
         -- people are not going to hit this at the same time obviously
-        --local show = WF.RPGData and (WF.RPGData[1] or WF.RPGData[2])
+        --local show = WF.EventData and (WF.EventData[1] or WF.EventData[2])
         --if not show then
         --    SM("No Event Data!")
         --    return false
@@ -58,9 +58,9 @@ local SelectionActions = {
         local overlay = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("ScreenEval Common")
         overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):visible(true)
         for p = 1, 2 do
-            if WF.RPGData[p] then
+            if WF.EventData[p] then
                 overlay:GetChild("AutoSubmitMaster"):GetChild("EventOverlay"):GetChild("P"..p.."EventAf")
-                :playcommand("Show", {data = WF.RPGData[p]})
+                :playcommand("Show", {data = WF.EventData[p]})
             end
         end
         overlay:queuecommand("DirectInputToEventHandler")
@@ -69,7 +69,7 @@ local SelectionActions = {
 	--["View ITL 2022 stats"] = function(pn)
     --   -- we actually want to just show the overlay for both players if available, since 2
     --   -- people are not going to hit this at the same time obviously
-    --   local show = WF.RPGData and (WF.RPGData[1] or WF.RPGData[2])
+    --   local show = WF.EventData and (WF.EventData[1] or WF.EventData[2])
     --   if not show then
     --       SM("No ITL 2022 Data!")
     --       return false
@@ -77,9 +77,9 @@ local SelectionActions = {
     --   local overlay = SCREENMAN:GetTopScreen():GetChild("Overlay"):GetChild("ScreenEval Common")
     --   overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):visible(true)
     --   for p = 1, 2 do
-    --       if WF.RPGData[p] then
+    --       if WF.EventData[p] then
     --           overlay:GetChild("AutoSubmitMaster"):GetChild("RpgOverlay"):GetChild("P"..p.."RpgAf")
-    --           :playcommand("Show", {data = WF.RPGData[p]})
+    --           :playcommand("Show", {data = WF.EventData[p]})
     --       end
     --   end
     --   overlay:queuecommand("DirectInputToRpgHandler")

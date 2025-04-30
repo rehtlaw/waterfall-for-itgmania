@@ -1,4 +1,4 @@
-WF.RPGData = {}
+WF.EventData = {}
 if not IsServiceAllowed(SL.GrooveStats.AutoSubmit) then return end
 
 local NumEntries = 10
@@ -230,7 +230,7 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                 if data[playerStr]["rpg"] or data[playerStr]["itl"] then
                     hasEvent = true
                     --rpgname = data[playerStr]["rpg"]["name"]
-                    WF.RPGData[i] = data[playerStr]
+                    WF.EventData[i] = data[playerStr]
 
                     -- add option to L+R menu
                     table.insert(WF.MenuSelections[i],
@@ -246,7 +246,7 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                 --if data[playerStr]["itl"] then
                 --	hasEvent = true
                 --	rpgname = data[playerStr]["itl"]["name"]
-                --	WF.RPGData[i] = data[playerStr]["itl"]
+                --	WF.EventData[i] = data[playerStr]["itl"]
                 --
                 --	-- add option to L+R menu
                 --	table.insert(WF.MenuSelections[i], 
