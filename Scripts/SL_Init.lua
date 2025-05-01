@@ -64,7 +64,7 @@ local PlayerDefaults = {
 				PreferredGraph = "Life",
 				PreferredSecondGraph = "Life",
 				PreferredGameEnv = "Waterfall",
-				PreferredFaultWindow = 2,
+				PreferredFaultWindow = 1,
 				GSOverride = false,
                 AlwaysGS = false,
 				
