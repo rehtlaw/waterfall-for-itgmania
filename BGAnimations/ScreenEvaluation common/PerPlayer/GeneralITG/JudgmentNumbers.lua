@@ -12,19 +12,10 @@ local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
 local num_mines = GAMESTATE:Env()["TotalMines" .. pn]
 local options = GAMESTATE:GetPlayerState(player):GetPlayerOptions("ModsLevel_Preferred")
 
-local faplus = SL[pn].ActiveModifiers.FAPlus
-if faplus == 0 then faplus = 0.015 end
+local faplus = 0.015
 
 -- FA+ stuff
-local blues = 0
-if faplus == 0.010 then
-	blues = WF.FAPlusCount[p][1]
-elseif faplus == 0.0125 then
-	blues = WF.FAPlusCount[p][2]
-elseif faplus == 0.015 then
-	--blues = pss:GetTapNoteScores("TapNoteScore_W1")
-	blues = WF.FAPlusCount[p][3]-- change to blue+white calculation in 0.7.6, Notes in WF-Scoring.lua	
-end
+local blues = WF.FAPlusCount[p][3]
 
 local TapNoteScores = {
 	Types = { 'W1', 'W2', 'W3', 'W4', 'W5', 'Miss' },
@@ -55,18 +46,14 @@ local boys = (gmods.TimingWindows[5]) and (math.abs(PREFSMAN:GetPreference("Timi
 (SL.Preferences.ITG.TimingWindowSecondsW3 + SL.Preferences.ITG.TimingWindowAdd)) >= 0.00001)
 local dummywindows = {true,true,true,boys,boys}
 if WF.SelectedErrorWindowSetting == 1 then dummywindows[4] = false end
-local showfaplus = (faplus) and (not dummywindows[4])
+local showfaplus = true
 for i=1,#TapNoteScores.Types do
 	local window = TapNoteScores.Types[i]
 	local number = WF.ITGJudgmentCounts[p][i]
 
 	if (showfaplus) and i == 1 then number = blues end
-	local zerorow = (not dummywindows[i]) and (((not showfaplus) and (i == 4 or i == 5)) or ((showfaplus) and i == 4))
-	local pushdown = ((showfaplus) and (i > 1 and i < 6)) and 35 or 0
-	if i == 5 and WF.SelectedErrorWindowSetting == 1 then
-		pushdown = 0
-		zerorow = false
-	end
+	local zerorow = not dummywindows[i] and i ~= 6
+	local pushdown = (i > 1) and 33 or 0
 
 	-- actual numbers
 	t[#t+1] = Def.RollingNumbers{
@@ -82,7 +69,6 @@ for i=1,#TapNoteScores.Types do
 			if zerorow then
 				self:Load("RollingNumbersEvaluationNoDecentsWayOffs")
 				self:diffuse(color("#444444"))
-				if showfaplus and WF.SelectedErrorWindowSetting == 1 and i == 4 then self:visible(false) end
 
 			-- Otherwise, We want leading 0s to be dimmed, so load the Metrics
 			-- group "RollingNumberEvaluationA"	which does that for us.
@@ -91,12 +77,12 @@ for i=1,#TapNoteScores.Types do
 			else
 				-- extra text, hide
 				self:Load("RollingNumbersEvaluationA")
-				self:visible(false)
+				-- self:visible(false)
 			end
 		end,
 		BeginCommand=function(self)
 			self:x( TapNoteScores.x[sn] )
-			self:y((i-1)*35 -20 + pushdown)
+			self:y((i-1) * 30 - 20 + pushdown)
 			self:targetnumber(number)
 		end
 	}
@@ -112,7 +98,7 @@ for i=1,#TapNoteScores.Types do
 			end,
 			BeginCommand = function(self)
 				self:x( TapNoteScores.x[sn] )
-				self:y(15)
+				self:y(11)
 				self:targetnumber(WF.ITGJudgmentCounts[p][1] - blues)
 			end
 		}
@@ -126,7 +112,7 @@ for index, RCType in ipairs(RadarCategories.Types) do
 
 	local performance = pss:GetRadarActual():GetValue( "RadarCategory_"..RCType )
 	local possible = pss:GetRadarPossible():GetValue( "RadarCategory_"..RCType )
-	
+
 	-- If player has mines disabled, total mine count shows 0. Display actual number
 	if options:NoMines() and RCType == 'Mines' then
 		performance = num_mines
@@ -138,7 +124,7 @@ for index, RCType in ipairs(RadarCategories.Types) do
 		Font="_ScreenEvaluation numbers",
 		InitCommand=function(self) self:zoom(0.5):horizalign(right):Load("RollingNumbersEvaluationB") end,
 		BeginCommand=function(self)
-			self:y((index-1)*35 + 53)
+			self:y((index-1)*35 + 89)
 			self:x( RadarCategories.x[sn] )
 			self:targetnumber(performance)
 		end
@@ -149,7 +135,7 @@ for index, RCType in ipairs(RadarCategories.Types) do
 		Text="/",
 		InitCommand=function(self) self:diffuse(color("#5A6166")):zoom(1.25):horizalign(right) end,
 		BeginCommand=function(self)
-			self:y((index-1)*35 + 53)
+			self:y((index-1)*35 + 89)
 			self:x( ((side == PLAYER_1) and -168) or 230 )
 		end
 	}
@@ -158,14 +144,14 @@ for index, RCType in ipairs(RadarCategories.Types) do
 	t[#t+1] = LoadFont("_ScreenEvaluation numbers")..{
 		InitCommand=function(self) self:zoom(0.5):horizalign(right) end,
 		BeginCommand=function(self)
-			self:y((index-1)*35 + 53)
+			self:y((index-1)*35 + 89)
 			self:x( ((side == PLAYER_1) and -114) or 286 )
 			self:settext(("%03.0f"):format(possible))
 			local leadingZeroAttr = { Length=math.max(3-tonumber(tostring(possible):len()),0), Diffuse=color("#5A6166") }
 			self:AddAttribute(0, leadingZeroAttr )
 		end
 	}
-	
+
 end
 
 -- If player has mines disabled and there are mines in the chart
@@ -175,37 +161,20 @@ if options:NoMines() and num_mines > 0 then
 		Name="NoMines1",
 		InitCommand=function(self)
 			self:zoomto(120,3)
-			self:y(35+53)
+			self:y(35+89)
 			self:x( ((side == PLAYER_1) and -173) or 226 )
 			self:rotationz(10)
 			self:diffuse(1,0,0,1)
-		end		
+		end
 	}
 	t[#t+1] = Def.Quad {
 		Name="NoMines2",
 		InitCommand=function(self)
 			self:zoomto(120,3)
-			self:y(35+53)
+			self:y(35+89)
 			self:x( ((side == PLAYER_1) and -173) or 226 )
 			self:rotationz(-10)
 			self:diffuse(1,0,0,1)
-		end		
-	}
-end
-
-
-
--- FA+ percent
-if true then
-	local totalj = pss:GetRadarPossible():GetValue("RadarCategory_TapsAndHolds")
-	local raw = (totalj > 0) and blues/totalj or 0
-	local s = string.format("%0.2f", math.floor(raw*10000)/100)
-	t[#t+1] = LoadFont("_ScreenEvaluation numbers")..{
-		Text = s,
-		InitCommand = function(self) self:zoom(0.5):horizalign(right) end,
-		BeginCommand = function(self)
-			self:y(158)
-			self:x( ((side == PLAYER_1) and -114) or 286 )
 		end
 	}
 end

@@ -9,6 +9,7 @@ if mode == "ITG" then name = name.."ITG" end
 if args.sec then name = name.."2" end
 local pn = ToEnumShortString(player)
 local faplus = SL["P"..player:sub(-1)].ActiveModifiers.FAPlus
+if faplus == 0 then faplus = 0.015 end
 
 -- table of offset values obtained during this song's playthrough
 -- obtained via ./BGAnimations/ScreenGameplay overlay/JudgmentOffsetTracking.lua

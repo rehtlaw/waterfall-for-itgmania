@@ -6,6 +6,7 @@ local GraphWidth = args.GraphWidth
 local GraphHeight = args.GraphHeight
 local mode = args.mode
 local faplus = SL["P"..player:sub(-1)].ActiveModifiers.FAPlus
+if faplus == 0 then faplus = 0.015 end
 local iscourse = GAMESTATE:IsCourseMode()
 
 local gw = THEME:GetMetric("GraphDisplay", "BodyWidth")

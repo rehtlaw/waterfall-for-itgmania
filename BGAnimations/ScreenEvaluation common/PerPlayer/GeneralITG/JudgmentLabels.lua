@@ -4,8 +4,7 @@ local side = player
 if args.sec then side = (player == PLAYER_1) and PLAYER_2 or PLAYER_1 end
 local pn = ToEnumShortString(player)
 
-local faplus = SL[pn].ActiveModifiers.FAPlus
-if faplus == 0 then faplus = 0.015 end
+local faplus = 0.015
 
 local tns_string = "TapNoteScore"
 
@@ -47,35 +46,35 @@ for i=1, 6 do
 			label = label.." *"
 		end
 
+		-- Blue/white Fantastic -- if using FA+ _and_ boys are off, we have room to show both
+		if (i == 1) then
+			t[#t+1] = LoadFont("Common Normal")..{
+				Text=label,
+				InitCommand=function(self) self:zoom(0.833):horizalign(right):maxwidth(76) end,
+				BeginCommand=function(self)
+					self:x( (side == PLAYER_1 and 28) or -28 )
+					self:y(10)
+					-- diffuse the JudgmentLabels the appropriate colors
+					self:diffuse( Color.White )
+				end
+			}
+		end
+
 		-- push ex-decent down if fa+ and #boysoff
-		local pushdown = ((faplus) and (not windows[4]) and i > 1 and i < 6) and 28 or 0
-		if i == 5 and WF.SelectedErrorWindowSetting == 1 then pushdown = 0 end
+		local pushdown = ((faplus) and i > 1) and 26 or 0
 
 		t[#t+1] = LoadFont("Common Normal")..{
 			Text=label,
 			InitCommand=function(self) self:zoom(0.833):horizalign(right):maxwidth(76) end,
 			BeginCommand=function(self)
 				self:x( (side == PLAYER_1 and 28) or -28 )
-				self:y((i-1)*28 -16 + pushdown)
+				self:y((i-1)*24 -16 + pushdown)
 				-- diffuse the JudgmentLabels the appropriate colors
 				self:diffuse( SL.JudgmentColors.ITG[i] )
 				--if i == 4 and WF.SelectedErrorWindowSetting == 1 then self:visible(false) end
 			end
 		}
 
-		-- Blue/white Fantastic -- if using FA+ _and_ boys are off, we have room to show both
-		if (faplus) and (i == 1) and (not windows[4]) then
-			t[#t+1] = LoadFont("Common Normal")..{
-				Text=label,
-				InitCommand=function(self) self:zoom(0.833):horizalign(right):maxwidth(76) end,
-				BeginCommand=function(self)
-					self:x( (side == PLAYER_1 and 28) or -28 )
-					self:y(12)
-					-- diffuse the JudgmentLabels the appropriate colors
-					self:diffuse( Color.White )
-				end
-			}
-		end
 	end
 end
 
@@ -86,20 +85,7 @@ for index, label in ipairs(RadarCategories) do
 		InitCommand=function(self) self:zoom(0.833):horizalign(right) end,
 		BeginCommand=function(self)
 			self:x( (side == PLAYER_1) and -160 or 80 )
-			self:y((index-1)*28 + 41)
-		end
-	}
-end
-
--- FA+ label
-if faplus then
-	local f = string.format("%d", faplus*1000)
-	t[#t+1] = LoadFont("Common Normal")..{
-		Text="FA+ ("..f.."ms)",
-		InitCommand=function(self) self:zoom(0.8) end,
-		BeginCommand=function(self)
-			self:x( (side == PLAYER_1 and -161) or 76 )
-			self:y(3 * 28 + 43)
+			self:y((index-1)*28 + 71)
 		end
 	}
 end
