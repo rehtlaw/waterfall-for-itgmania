@@ -12,8 +12,11 @@ local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
 local num_mines = GAMESTATE:Env()["TotalMines" .. pn]
 local options = GAMESTATE:GetPlayerState(player):GetPlayerOptions("ModsLevel_Preferred")
 
-local faplus = SL[pn].ActiveModifiers.FAPlus
+local mods = SL[ToEnumShortString(player)].ActiveModifiers
+
+local faplus = mods.FAPlus
 if faplus == 0 or faplus == 0.015 then faplus = false end
+local displayExScore = mods.EXScoring
 
 -- FA+ stuff
 local blues = 0
@@ -120,7 +123,7 @@ for index, RCType in ipairs(RadarCategories.Types) do
 		performance = num_mines
 		possible = num_mines
 	end
-	
+
 	-- player performance value
 	t[#t+1] = Def.RollingNumbers{
 		Font="_ScreenEvaluation numbers",
@@ -129,6 +132,13 @@ for index, RCType in ipairs(RadarCategories.Types) do
 			self:y((index-1)*35 + 53)
 			self:x( RadarCategories.x[sn] )
 			self:targetnumber(performance)
+
+			if displayExScore then
+				self:y((index-1) * 35 + 89)
+			end
+		end,
+		SendEventDataMessageCommand=function(self)
+			self:y((index-1) * 35 + 89)
 		end
 	}
 
@@ -139,6 +149,13 @@ for index, RCType in ipairs(RadarCategories.Types) do
 		BeginCommand=function(self)
 			self:y((index-1)*35 + 53)
 			self:x( ((side == PLAYER_1) and -168) or 230 )
+
+			if displayExScore then
+				self:y((index-1) * 35 + 89)
+			end
+		end,
+		SendEventDataMessageCommand=function(self)
+			self:y((index-1) * 35 + 89)
 		end
 	}
 
@@ -151,6 +168,13 @@ for index, RCType in ipairs(RadarCategories.Types) do
 			self:settext(("%03.0f"):format(possible))
 			local leadingZeroAttr = { Length=math.max(3-tonumber(tostring(possible):len()),0), Diffuse=color("#5A6166") }
 			self:AddAttribute(0, leadingZeroAttr )
+
+			if displayExScore then
+				self:y((index-1) * 35 + 89)
+			end
+		end,
+		SendEventDataMessageCommand=function(self)
+			self:y((index-1) * 35 + 89)
 		end
 	}
 end
@@ -166,7 +190,14 @@ if options:NoMines() and num_mines > 0 then
 			self:x( ((side == PLAYER_1) and -173) or 226 )
 			self:rotationz(10)
 			self:diffuse(1,0,0,1)
-		end		
+
+			if displayExScore then
+				self:y(35 + 89)
+			end
+		end,
+		SendEventDataMessageCommand=function(self)
+			self:y(35 + 89)
+		end
 	}
 	t[#t+1] = Def.Quad {
 		Name="NoMines2",
@@ -176,21 +207,13 @@ if options:NoMines() and num_mines > 0 then
 			self:x( ((side == PLAYER_1) and -173) or 226 )
 			self:rotationz(-10)
 			self:diffuse(1,0,0,1)
-		end		
-	}
-end
 
--- FA+ percent
-if faplus then
-	local totalj = pss:GetRadarPossible():GetValue("RadarCategory_TapsAndHolds")
-	local raw = (totalj > 0) and blues/totalj or 0
-	local s = string.format("%0.2f", math.floor(raw*10000)/100)
-	t[#t+1] = LoadFont("_ScreenEvaluation numbers")..{
-		Text = s,
-		InitCommand = function(self) self:zoom(0.5):horizalign(right) end,
-		BeginCommand = function(self)
-			self:y(158)
-			self:x( ((side == PLAYER_1) and -114) or 286 )
+			if displayExScore then
+				self:y(35 + 89)
+			end
+		end,
+		SendEventDataMessageCommand=function(self)
+			self:y(35 + 89)
 		end
 	}
 end

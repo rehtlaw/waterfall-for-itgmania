@@ -5,8 +5,11 @@ if args.sec then side = (player == PLAYER_1) and PLAYER_2 or PLAYER_1 end
 local pn = ToEnumShortString(player)
 local stats = STATSMAN:GetCurStageStats():GetPlayerStageStats(pn)
 
-local faplus = SL[pn].ActiveModifiers.FAPlus
+local mods = SL[ToEnumShortString(player)].ActiveModifiers
+
+local faplus = mods.FAPlus
 if faplus == 0 or faplus == 0.015 then faplus = false end
+local displayExScore = mods.EXScoring
 
 local tns_string = "TapNoteScore"
 
@@ -99,19 +102,12 @@ for index, label in ipairs(RadarCategories) do
 		BeginCommand=function(self)
 			self:x( (side == PLAYER_1) and -160 or 80 )
 			self:y((index-1)*28 + 41)
-		end
-	}
-end
-
--- FA+ label
-if faplus then
-	local f = string.format("%d", faplus*1000)
-	t[#t+1] = LoadFont("Common Normal")..{
-		Text="FA+ ("..f.."ms)",
-		InitCommand=function(self) self:zoom(0.8) end,
-		BeginCommand=function(self)
-			self:x( (side == PLAYER_1 and -161) or 76 )
-			self:y(3 * 28 + 43)
+			if displayExScore then
+				self:y((index-1) * 28 + 71)
+			end
+		end,
+		SendEventDataMessageCommand=function(self)
+			self:y((index-1) * 28 + 71)
 		end
 	}
 end
