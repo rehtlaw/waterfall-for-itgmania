@@ -64,62 +64,6 @@ local t = Def.ActorFrame{
 			end
 		}
 	}
-
-	-- Both ITG and EX percent
-	-- Def.ActorFrame {
-	-- 	LoadFont("_wendy white")..{
-	-- 		Name="Percent",
-	-- 		Text=percent,
-	-- 		InitCommand=function(self)
-	-- 			--self:horizalign(right):zoom(0.585)
-	-- 			self:x( (side == PLAYER_1 and -110 or 29.5))
-	-- 			self:horizalign(center):zoom(0.2925)
-	-- 			self:y(10)
-	-- 			self:diffuse(SL.JudgmentColors.ITG[1])
-	-- 		end
-	-- 	},
-	-- 	LoadFont("_wendy white")..{
-	-- 		Name="Percent",
-	-- 		Text=percent,
-	-- 		InitCommand=function(self)
-	-- 			--self:horizalign(right):zoom(0.585)
-	-- 			self:x( (side == PLAYER_1 and -30 or 112.5))
-	-- 			self:horizalign(center):zoom(0.2925)
-	-- 			self:y(10)
-	-- 			--self:diffuse(SL.JudgmentColors.ITG[1])
-	-- 		end
-	-- 	},
-	-- 	-- labels
-	-- 	LoadFont("_wendy white")..{
-	-- 		Name="EXPercentLabel",
-	-- 		Text="EX",
-	-- 		InitCommand=function(self)
-	-- 			--self:horizalign(right):zoom(0.585)
-	-- 			self:x( (side == PLAYER_1 and -110 or 29.5))
-	-- 			self:horizalign(center):zoom(0.2925)
-	-- 			self:y(-15)
-	-- 			self:diffuse(SL.JudgmentColors.ITG[1])
-	-- 		end
-	-- 	},
-	-- 	LoadFont("_wendy white")..{
-	-- 		Name="PercentLabel",
-	-- 		Text="ITG",
-	-- 		InitCommand=function(self)
-	-- 			--self:horizalign(right):zoom(0.585)
-	-- 			self:x( (side == PLAYER_1 and -30 or 112.5))
-	-- 			self:horizalign(center):zoom(0.2925)
-	-- 			self:y(-15)
-	-- 			--self:diffuse(SL.JudgmentColors.ITG[1])
-	-- 		end
-	-- 	},
-	-- 	InitCommand=function(self)
-	-- 		if not displayExScore then
-	-- 			self:diffusealpha(0)
-	-- 			self:sleep(2):queuecommand("Loop")
-	-- 		end
-	-- 	end,
-	-- }
-
 }
 
 return t
