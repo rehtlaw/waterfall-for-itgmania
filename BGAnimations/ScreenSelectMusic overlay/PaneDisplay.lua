@@ -481,8 +481,6 @@ for player in ivalues(PlayerNumber) do
 					p10 = string.format("%0.2f", math.floor(((fa10 or 0)/stepcount)*10000)/100)
 					p15 = string.format("%0.2f", math.floor(((fa15 or 0)/stepcount)*10000)/100)
 				end
-				self:GetParent():GetChild("Rival2Score"):settext(p10)
-				self:GetParent():GetChild("Rival3Score"):settext(p15)
 			end
 		end
 	}
@@ -525,51 +523,6 @@ for player in ivalues(PlayerNumber) do
 			self:settext("")
 		end
 	}
-
-	-- Add actors for Rival score data. Hidden by default
-	-- We position relative to column 3 for spacing reasons.
-	for i=1,3 do
-		local xPosName = pos.col[3]+WideScale(50, 54)*text_zoom
-		local xPosScore = pos.col[3]+WideScale(122, 125)*text_zoom
-		local yPos = pos.row[i]
-
-		-- Rival Machine Tag
-		af2[#af2+1] = LoadFont("Common Normal")..{
-			Name="Rival"..i.."Name",
-			InitCommand=function(self)
-				self:zoom(text_zoom):diffuse(Color.Black):maxwidth(30)
-				self:xy(xPosName, yPos)
-			end,
-			OnCommand=function(self)
-				self:visible(WF.PlayerProfileStats[pnum] ~= nil)
-			end,
-			SetCommand=function(self)
-				if UseGSScore(pn) then
-					self:settext("----")
-				else
-					local faText = (i == 1 and "FA+") or (i == 2 and "10ms") or (i == 3 and "15ms")
-					self:settext(faText)
-				end
-			end,
-			SetLoadingCommand = function(self) self:settext(". . .") end
-		}
-
-		-- Rival HighScore
-		af2[#af2+1] = LoadFont("Common Normal")..{
-			Name="Rival"..i.."Score",
-			InitCommand=function(self)
-				self:zoom(text_zoom):diffuse(Color.Black):horizalign(right)
-				self:xy(xPosScore, yPos)
-			end,
-			OnCommand=function(self)
-				self:visible(WF.PlayerProfileStats[pnum] ~= nil and (UseGSScore(pn) or i ~= 1))
-			end,
-			SetCommand=function(self)
-				self:settext("----")
-			end,
-			SetLoadingCommand = function(self) self:settext(". . .") end
-		}
-	end
 
 end
 
