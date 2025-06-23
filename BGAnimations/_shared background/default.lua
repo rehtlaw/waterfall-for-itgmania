@@ -7,7 +7,8 @@ af[#af+1] = Def.Quad{
 
 -- add common background here
 --af[#af+1] = LoadActor("./wf07still.png")..{ -- If you are having performance issues, use this one instead
-af[#af+1] = LoadActor("./hd277.mp4")..{
+--af[#af+1] = LoadActor("./hd277.mp4")..{
+af[#af+1] = LoadActor("./SRPG.mp4")..{
 	InitCommand = function(self)
 		self:zoom(SCREEN_HEIGHT/1080)
 		self:xy(SCREEN_CENTER_X, SCREEN_CENTER_Y)

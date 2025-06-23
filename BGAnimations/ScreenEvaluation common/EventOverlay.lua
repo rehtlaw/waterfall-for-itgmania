@@ -18,7 +18,7 @@ local SetRpgStyle = function(eventAf)
 	eventAf:GetChild("HeaderBorder"):diffuse(RpgYellow)
 	
 	local idx = SL.Global.ActiveColorIndex
-	local faction_name = SL.SRPG8.GetFactionName(idx)
+	local faction_name = SL.SRPG.GetFactionName(idx)
 
 	if faction_name == "Stamina Nation" then
 		eventAf:GetChild("HeaderBackground")
@@ -832,7 +832,7 @@ for player in ivalues(PlayerNumber) do
 		-- Main Black cement background
 		Def.Sprite {
 			Name="BackgroundImage",
-			Texture=THEME:GetPathG("", "_VisualStyles/SRPG8/Overlay-BG.jpg"),
+			Texture=THEME:GetPathG("", "_VisualStyles/SRPG/Overlay-BG.jpg"),
 			InitCommand=function(self)
 				self:CropTo(paneWidth, paneHeight)
 			end

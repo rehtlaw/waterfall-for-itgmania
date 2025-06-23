@@ -31,7 +31,7 @@ local style_color = {
 local style_background = {
 	[0] = THEME:GetPathG("", "GrooveStats.png"),
 	[1] = THEME:GetPathG("", "GrooveStats.png"),
-	[2] = THEME:GetPathG("", "SRPG8"),
+	[2] = THEME:GetPathG("", "_VisualStyles/SRPG/logo_alt (doubleres).png"),
 	[3] = THEME:GetPathG("", "ITL.png"),
 }
 
@@ -421,7 +421,7 @@ local af = Def.ActorFrame{
 	-- SRPG Logo
 	Def.Sprite{
 		Texture=style_background[2],
-		Name="SRPG8Logo",
+		Name="SRPGLogo",
 		InitCommand=function(self)
 			self:diffusealpha(0.4):zoom(0.03):diffusealpha(0)
 		end,
