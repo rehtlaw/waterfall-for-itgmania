@@ -18,26 +18,11 @@ local SetRpgStyle = function(eventAf)
 	eventAf:GetChild("HeaderBorder"):diffuse(RpgYellow)
 	
 	local idx = SL.Global.ActiveColorIndex
-	local faction_name = SL.SRPG.GetFactionName(idx)
 
-	if faction_name == "Stamina Nation" then
-		eventAf:GetChild("HeaderBackground")
-				:diffusetopedge(color("#523328"))
-				:diffusebottomedge(color("#815354"))
-	elseif faction_name == "Democratic People's Republic of Timing" then
-		eventAf:GetChild("HeaderBackground")
-				:diffusetopedge(color("#15313D"))
-				:diffusebottomedge(color("#34605D"))
-    elseif faction_name == "Footspeed Empire" then
-		eventAf:GetChild("HeaderBackground")
-				:diffusetopedge(color("#412147"))
-				:diffusebottomedge(color("#634B80"))
-	else
-		-- "Unaffiliated"
-		eventAf:GetChild("HeaderBackground")
-				:diffusetopedge(color("#14362D"))
-				:diffusebottomedge(color("#376648"))
-	end
+	-- "Unaffiliated"
+	eventAf:GetChild("HeaderBackground")
+			:diffusetopedge(color("#14362D"))
+			:diffusebottomedge(color("#376648"))
 
 	eventAf:GetChild("Header"):diffuse(RpgText)
 	eventAf:GetChild("EX"):visible(false)

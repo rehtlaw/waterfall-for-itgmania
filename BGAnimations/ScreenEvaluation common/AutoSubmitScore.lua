@@ -232,6 +232,8 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                     --rpgname = data[playerStr]["rpg"]["name"]
                     WF.EventData[i] = data[playerStr]
 
+
+
                     -- add option to L+R menu
                     table.insert(WF.MenuSelections[i],
                         { "View Event stats", true })
@@ -242,6 +244,16 @@ local AutoSubmitRequestProcessor = function(res, overlay)
                     shouldDisplayOverlay = true
                     --end
                 end
+
+                -- only send this message for ITL for now, all of the code that respects
+                -- this message assumes ITL right now.
+                 if data[playerStr]["itl"] then
+                   MESSAGEMAN:Broadcast("SendEventData", WF.EventData)
+                 end
+
+--                 if data[playerStr]["rpg"] then
+--                   MESSAGEMAN:Broadcast("SendEventData", WF.EventData)
+--                 end
 
                 --if data[playerStr]["itl"] then
                 --	hasEvent = true
