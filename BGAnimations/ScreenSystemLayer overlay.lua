@@ -17,6 +17,10 @@ local function CreditsText( pn )
 			local bShow = true
 			if screen then
 				bShow = THEME:GetMetric( screen:GetName(), "ShowCreditDisplay" )
+				if (screen:GetName() == "ScreenGameplay") then
+					bShow = GAMESTATE:IsHumanPlayer(player)
+					self:diffuse(Color.White)
+				end
 			end
 			self:visible( bShow )
 		end
