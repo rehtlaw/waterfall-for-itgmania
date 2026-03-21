@@ -247,9 +247,9 @@ local AutoSubmitRequestProcessor = function(res, overlay)
 
                 -- only send this message for ITL for now, all of the code that respects
                 -- this message assumes ITL right now.
-                 if data[playerStr]["itl"] then
-                   MESSAGEMAN:Broadcast("SendEventData", WF.EventData)
-                 end
+                 -- if data[playerStr]["itl"] then
+                 --   MESSAGEMAN:Broadcast("SendEventData", WF.EventData)
+                 -- end
 
 --                 if data[playerStr]["rpg"] then
 --                   MESSAGEMAN:Broadcast("SendEventData", WF.EventData)
