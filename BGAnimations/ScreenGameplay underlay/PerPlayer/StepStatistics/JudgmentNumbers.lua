@@ -60,10 +60,10 @@ for index, window in ipairs(TapNoteScores) do
 	if (faplus) and index > 1 then h = h + row_height end
 	
 	-- player performance value
-	t[#t+1] = LoadFont("_ScreenEvaluation numbers")..{
+	t[#t+1] = LoadFont("raxye/_raxye main")..{
 		Text=(pattern):format(0),
 		InitCommand=function(self)
-			self:zoom(0.5):horizalign(left)
+			self:zoom(0.55):horizalign(left)
 
 			if windows[index] or index==#TapNoteScores then
 				self:diffuse( SL.JudgmentColors[mode][index] )
@@ -74,7 +74,7 @@ for index, window in ipairs(TapNoteScores) do
 			end
 		end,
 		BeginCommand=function(self)
-			self:x( 108 )
+			self:x( 106 )
 			self:y(h)
 
 			-- horizontally squishing the numbers isn't pretty, but I'm not sure what else to do

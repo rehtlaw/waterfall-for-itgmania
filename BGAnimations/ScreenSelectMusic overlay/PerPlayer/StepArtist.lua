@@ -186,9 +186,9 @@ local af = Def.ActorFrame{
 				end
 			end
 		},
-		LoadFont("_wendy small")..{
+		LoadFont("raxye/_raxye numbers")..{
 			Name="DifficultyMeter",
-			InitCommand=function(self) self:horizalign(right):diffuse(Color.Black):zoom(0.6):xy(19,5):queuecommand("Reset") end,
+			InitCommand=function(self) self:horizalign(right):diffuse(Color.Black):zoom(0.215):xy(18,-2):queuecommand("Reset") end,
 			ResetCommand=function(self)
 				local SongOrCourse = (GAMESTATE:IsCourseMode() and GAMESTATE:GetCurrentCourse()) or GAMESTATE:GetCurrentSong()
 				if not SongOrCourse then self:settext(""); return end

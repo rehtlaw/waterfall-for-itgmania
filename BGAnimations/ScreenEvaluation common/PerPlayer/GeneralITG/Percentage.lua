@@ -28,13 +28,13 @@ local t = Def.ActorFrame{
 
 	-- Always show EX score big on top with ITG score smaller below
 	Def.ActorFrame {
-		LoadFont("_wendy white")..{
+		LoadFont("raxye/_raxye numbers")..{
 			Name="EXPercent",
 			Text=expercent,
 			InitCommand=function(self)
-				self:horizalign(right):zoom(0.585)
+				self:horizalign(right):zoom(0.355)
 				self:x( (side == PLAYER_1 and 1.5 or 141))
-				self:y(-15)
+				self:y(-32)
 				self:diffuse(SL.JudgmentColors.ITG[1])
 			end
 		},
@@ -42,23 +42,23 @@ local t = Def.ActorFrame{
 
 	-- smaller ITG score
 	Def.ActorFrame {
-		LoadFont("_wendy white")..{
+		LoadFont("raxye/_raxye numbers")..{
 			Name="Percent",
 			Text=percent,
 			InitCommand=function(self)
-				self:horizalign(right):zoom(0.4)
+				self:horizalign(right):zoom(0.25)
 				self:x( ((side == PLAYER_1) and -0.5) or 139)
-				self:y(25)
+				self:y(14)
 			end
 		}
 	},
 	-- ITG label
 	Def.ActorFrame {
-		LoadFont("_wendy white")..{
+		LoadFont("raxye/_raxye main")..{
 			Name="PercentLabel",
 			Text="ITG",
 			InitCommand=function(self)
-				self:zoom(0.3):horizalign(right)
+				self:zoom(0.5):horizalign(right)
 				self:x( (side == PLAYER_1 and -103) or 40)
 				self:y(26)
 			end

@@ -28,7 +28,7 @@ local text = nil
 -- else
 -- 	font = "_Combo Fonts/" .. font .. "/"
 -- end
-local font = "_wendy small"
+local font = "raxye/_raxye numbers"
 
 local Update = function(self, delta)
 	if curIndex <= #columnCues then
@@ -178,8 +178,8 @@ for columnIndex=1,numColumns do
 			Text="",
 			InitCommand=function(self)
 				local zoom_factor = 1 - scale( mods.Mini:gsub("%%","")/100, 0, 2, 0, 1)
-				self:zoom(0.5)
-					:zoomx(0.5/zoom_factor)
+				self:zoom(0.23)
+					:zoomx(0.23/zoom_factor)
 					:diffuse(0,0,0,0)
 					:horizalign(center)
 					:x((columnIndex - (numColumns/2 + 0.5)) * (width/numColumns))
@@ -187,7 +187,7 @@ for columnIndex=1,numColumns do
 				if IsReversedColumn(player, columnIndex) then
 					self:y(260)
 				else
-					self:y(80)
+					self:y(76)
 				end
 					
 				text = self

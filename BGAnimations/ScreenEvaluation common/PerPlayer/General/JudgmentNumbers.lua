@@ -62,9 +62,10 @@ for i=1,#TapNoteScores.Types do
 
 	-- actual numbers
 	t[#t+1] = Def.RollingNumbers{
-		Font="_ScreenEvaluation numbers",
+		--Font="_ScreenEvaluation numbers",
+		Font="raxye/_raxye main",
 		InitCommand=function(self)
-			self:zoom(0.5):horizalign(right):maxwidth(76/0.5)
+			self:zoom(0.6):horizalign(right):maxwidth(130/0.5)
 
 			self:diffuse( SL.JudgmentColors.Waterfall[i] )
 
@@ -86,8 +87,8 @@ for i=1,#TapNoteScores.Types do
 			end
 		end,
 		BeginCommand=function(self)
-			self:x( TapNoteScores.x[sn] )
-			self:y((i-1)*35 -20 + pushdown)
+			self:x( TapNoteScores.x[sn])
+			self:y((i-1)*35 -21 + pushdown)
 			self:targetnumber(number)
 		end
 	}
@@ -95,7 +96,7 @@ for i=1,#TapNoteScores.Types do
 	-- FA+ number, if shown
 	if (showfaplus) and i == 1 then
 		t[#t+1] = Def.RollingNumbers{
-			Font="_ScreenEvaluation numbers",
+			Font="raxye/_raxye main",
 			InitCommand = function(self)
 				self:zoom(0.5):horizalign(right)
 				self:diffuse(Color.White)
@@ -126,8 +127,8 @@ for index, RCType in ipairs(RadarCategories.Types) do
 
 	-- player performance value
 	t[#t+1] = Def.RollingNumbers{
-		Font="_ScreenEvaluation numbers",
-		InitCommand=function(self) self:zoom(0.5):horizalign(right):Load("RollingNumbersEvaluationB") end,
+		Font="raxye/_raxye main",
+		InitCommand=function(self) self:zoom(0.6):horizalign(right):Load("RollingNumbersEvaluationB") end,
 		BeginCommand=function(self)
 			self:y((index-1)*35 + 53)
 			self:x( RadarCategories.x[sn] )
@@ -160,8 +161,8 @@ for index, RCType in ipairs(RadarCategories.Types) do
 	}
 
 	-- possible value
-	t[#t+1] = LoadFont("_ScreenEvaluation numbers")..{
-		InitCommand=function(self) self:zoom(0.5):horizalign(right) end,
+	t[#t+1] = LoadFont("raxye/_raxye main")..{
+		InitCommand=function(self) self:zoom(0.6):horizalign(right) end,
 		BeginCommand=function(self)
 			self:y((index-1)*35 + 53)
 			self:x( ((side == PLAYER_1) and -114) or 286 )

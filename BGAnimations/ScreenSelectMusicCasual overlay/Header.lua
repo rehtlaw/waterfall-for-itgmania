@@ -17,7 +17,7 @@ local af = Def.ActorFrame{
 	-- "Choose Your Song"
 	Def.BitmapText{
 		Name="HeaderText",
-		Font="_wendy small",
+		Font="raxye/_raxye main",
 		Text=text,
 		InitCommand=function(self) self:diffuse(1,1,1,0):zoom(WideScale(0.5,0.6)):horizalign(left):xy(10, 15) end,
 		OffCommand=function(self) self:accelerate(0.33):diffusealpha(0) end,

@@ -61,10 +61,10 @@ local af = Def.ActorFrame{
 	},
 
 	-- numerical difficulty meter
-	LoadFont("_wendy small")..{
+	LoadFont("raxye/_raxye numbers")..{
 		InitCommand=function(self)
-			self:diffuse(Color.Black):zoom( 0.55 )
-			self:y( _screen.cy-42 )
+			self:diffuse(Color.Black):zoom( 0.24 )
+			self:y( _screen.cy-50 )
 			self:x((126 * (player==PLAYER_1 and -1 or 1)) + 20)
 			self:horizalign("right")
 

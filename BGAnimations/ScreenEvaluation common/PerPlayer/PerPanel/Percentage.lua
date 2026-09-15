@@ -26,9 +26,9 @@ return Def.ActorFrame{
 		end
 	},
 
-	LoadFont("_wendy white")..{
+	LoadFont("raxye/_raxye numbers")..{
 		Text=percent,
 		Name="Percent",
-		InitCommand=function(self) self:horizalign(right):zoom(0.25):xy( 30, -2) end,
+		InitCommand=function(self) self:horizalign(right):zoom(0.175):xy( 30, -10) end,
 	}
 }

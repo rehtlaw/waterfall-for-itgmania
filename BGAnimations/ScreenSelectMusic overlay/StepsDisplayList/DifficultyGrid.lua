@@ -146,11 +146,12 @@ for IconNumber=1,num_icons do
 		end
 	}
 	-- difficulty number
-	Grid[#Grid+1] = LoadFont("_wendy small")..{
+	Grid[#Grid+1] = LoadFont("raxye/_raxye numbers")..{
 		Name="Meter_"..IconNumber,
 		InitCommand=function(self)
 			self:y(IconNumber * (iconh + 2) - iconh/2)
-			self:zoom(0.5)
+			self:x(8)
+			self:zoom(0.2)
 			self:diffuse(0,0,0,1)
 			self:rotationz(90)
 		end,

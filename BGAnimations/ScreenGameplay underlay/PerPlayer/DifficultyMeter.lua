@@ -24,10 +24,11 @@ return Def.ActorFrame{
 	},
 
 	-- player's chart's difficulty meter
-	LoadFont("_wendy small")..{
+	LoadFont("raxye/_raxye numbers")..{
 		InitCommand=function(self)
 			self:diffuse( Color.Black )
-			self:zoom( 0.4 )
+			self:zoom( 0.18 )
+			self:y(-7)
 		end,
 		CurrentSongChangedMessageCommand=function(self) self:queuecommand("Begin") end,
 		BeginCommand=function(self)

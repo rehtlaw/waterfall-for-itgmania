@@ -36,11 +36,11 @@ af[#af+1] = LoadActor( THEME:GetPathG("", "_header.lua") )
 -- session timer in EventMode
 if PREFSMAN:GetPreference("EventMode") then
 
-	af[#af+1] = LoadFont("_wendy monospace numbers")..{
+	af[#af+1] = LoadFont("raxye/_raxye numbers")..{
 		Name="Session Timer",
 		InitCommand=function(self)
 			bmt_actor = self
-			self:zoom( WideScale(0.3,0.36) ):y( WideScale(3.15,3.5)/self:GetZoom() )
+			self:zoom(0.21):y(8)
 			self:diffusealpha(0):x(_screen.cx)
 		end,
 		OnCommand=function(self)
@@ -66,9 +66,9 @@ else
 end
 
 -- some text aligned to right of screen
-af[#af+1] = LoadFont("_wendy small")..{
+af[#af+1] = LoadFont("raxye/_raxye main")..{
 	Name="RightSideText",
-	Text=GAMESTATE:IsCourseMode() and "Marathon" or "Standard",
+	Text=GAMESTATE:IsCourseMode() and "MARATHON" or "STANDARD",
 	InitCommand=function(self)
 		self:diffusealpha(0):zoom( WideScale(0.5,0.6)):halign(1):y(15)
 

@@ -271,12 +271,12 @@ for player in ivalues(GAMESTATE:GetHumanPlayers()) do
 	}
 
 	-- the large block text at the top that shows each player their current scroll speed
-	t[#t+1] = LoadFont("_wendy small")..{
+	t[#t+1] = LoadFont("raxye/_raxye numbers")..{
 		Name=pn.."SpeedModHelper",
 		Text="",
 		InitCommand=function(self)
 			self:diffuse(PlayerColor(player)):diffusealpha(0)
-			self:zoom(0.5):y(48)
+			self:zoom(0.19):y(40)
 			self:x(player==PLAYER_1 and -100 or 150)
 			self:shadowlength(0.55)
 		end,

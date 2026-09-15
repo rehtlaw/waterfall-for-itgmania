@@ -29,9 +29,9 @@ local af = Def.ActorFrame{
             end
         },
     
-        LoadFont("_wendy white")..{
+        LoadFont("raxye/_raxye main")..{
             Text="FA+",
-            InitCommand=function(self) self:horizalign("center"):zoom(0.25):xy( 0, -2) end,
+            InitCommand=function(self) self:horizalign("center"):zoom(0.65):xy( 0, -4) end,
         }
     },
 
@@ -67,29 +67,29 @@ local af = Def.ActorFrame{
             InitCommand = function(self) self:xy(52, 58):horizalign("right"):zoom(0.833) end
         },
         -- count numbers
-        LoadFont("_ScreenEvaluation numbers")..{
+        LoadFont("raxye/_raxye numbers")..{
             Text = tostring(WF.FAPlusCount[pn][1]),
             InitCommand = function(self)
-                self:xy(132, 28):horizalign("right"):zoom(0.4):maxwidth(64/0.4)
+                self:xy(132, 24):horizalign("right"):zoom(0.2)
             end
         },
-        LoadFont("_ScreenEvaluation numbers")..{
+        LoadFont("raxye/_raxye numbers")..{
             Text = tostring(perfects),
             InitCommand = function(self)
-                self:xy(132, 56):horizalign("right"):zoom(0.4):maxwidth(64/0.4)
+                self:xy(132, 52):horizalign("right"):zoom(0.2)
             end
         },
         -- percents
-        LoadFont("_ScreenEvaluation numbers")..{
+        LoadFont("raxye/_raxye numbers")..{
             Text = percent1,
             InitCommand = function(self)
-                self:xy(226, 28):horizalign("right"):zoom(0.4)
+                self:xy(226, 24):horizalign("right"):zoom(0.2)
             end
         },
-        LoadFont("_ScreenEvaluation numbers")..{
+        LoadFont("raxye/_raxye numbers")..{
             Text = percent3,
             InitCommand = function(self)
-                self:xy(226, 56):horizalign("right"):zoom(0.4)
+                self:xy(226, 52):horizalign("right"):zoom(0.2)
             end
         },
         -- step count
@@ -97,10 +97,10 @@ local af = Def.ActorFrame{
             Text = "Total Steps",
             InitCommand = function(self) self:xy(120, 106):horizalign("right"):zoom(0.833) end
         },
-        LoadFont("_ScreenEvaluation numbers")..{
+        LoadFont("raxye/_raxye numbers")..{
             Text = tostring(notes),
             InitCommand = function(self)
-                self:xy(226, 104):horizalign("right"):zoom(0.4)
+                self:xy(226, 100):horizalign("right"):zoom(0.2)
             end
         },
     }

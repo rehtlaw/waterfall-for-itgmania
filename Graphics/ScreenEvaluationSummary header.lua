@@ -2,9 +2,9 @@ local af = Def.ActorFrame{}
 
 af[#af+1] = LoadActor( THEME:GetPathG("", "_header.lua") )
 
-af[#af+1] = LoadFont("_wendy small")..{
+af[#af+1] = LoadFont("raxye/_raxye main")..{
 	Name="SummaryText",
-	Text=GAMESTATE:IsCourseMode() and "Marathon" or "Standard",
+	Text=GAMESTATE:IsCourseMode() and "MARATHON" or "STANDARD",
 	InitCommand=function(self)
 		self:diffusealpha(0):zoom( WideScale(0.5,0.6)):halign(1):y(15)
 

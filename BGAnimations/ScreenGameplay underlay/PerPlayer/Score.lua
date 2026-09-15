@@ -52,11 +52,11 @@ local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
 local af = Def.ActorFrame{
 	Name=pn.."Score",
 	-- ITG score
-	LoadFont("_wendy monospace numbers")..{
+	LoadFont("raxye/_raxye numbers")..{
 		--Name=pn.."Score",
 		InitCommand=function(self)
 			self:valign(1):halign(1)
-			self:zoom(0.5)
+			self:zoom(0.28)
 
 			-- assume "normal" score positioning first, but there are many reasons it will need to be moved
 			self:xy( pos[player].x, pos[player].y )
@@ -100,12 +100,12 @@ local af = Def.ActorFrame{
 		end
 	},
 	-- EX Percent
-	LoadFont("_wendy monospace numbers")..{
+	LoadFont("raxye/_raxye numbers")..{
 		--Name=pn.."EXScore",
 		InitCommand=function(self)
 			if not displayExScore then return end 
 			self:valign(1):halign(1)
-			self:zoom(0.5)
+			self:zoom(0.28)
 			self:diffuse(SL.JudgmentColors.ITG[1])
 			
 			-- 2 player mode only has room for 1 score. if ex score is on then show that in place of regular score
