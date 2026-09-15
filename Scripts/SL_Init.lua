@@ -156,6 +156,8 @@ local GlobalDefaults = {
 				ScreenNameEntry = ThemePrefs.Get("ScreenNameEntryMenuTimer"),
 			}
 			self.TimeAtSessionStart = nil
+			self.SampleMusicLoops = ThemePrefs.Get("SampleMusicLoops")
+			self.SampleMusicStartsImmediately = ThemePrefs.Get("SampleMusicStartsImmediately")
 
 			self.GameplayReloadCheck = false
 			-- How long to wait before displaying a "cue"
