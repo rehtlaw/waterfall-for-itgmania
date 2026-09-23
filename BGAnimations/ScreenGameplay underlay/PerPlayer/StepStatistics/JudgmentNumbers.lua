@@ -56,14 +56,14 @@ local t = Def.ActorFrame{
 for index, window in ipairs(TapNoteScores) do
 
 	-- push down for FA+
-	local h = (index-1)*row_height - 282
+	local h = (index-1)*row_height - 286
 	if (faplus) and index > 1 then h = h + row_height end
 	
 	-- player performance value
-	t[#t+1] = LoadFont("raxye/_raxye main")..{
+	t[#t+1] = LoadFont("raxye/_main")..{
 		Text=(pattern):format(0),
 		InitCommand=function(self)
-			self:zoom(0.55):horizalign(left)
+			self:zoom(0.275):horizalign(left)
 
 			if windows[index] or index==#TapNoteScores then
 				self:diffuse( SL.JudgmentColors[mode][index] )

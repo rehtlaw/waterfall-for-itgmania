@@ -186,7 +186,7 @@ local af = Def.ActorFrame{
 				end
 			end
 		},
-		LoadFont("raxye/_raxye numbers")..{
+		LoadFont("raxye/_numbers")..{
 			Name="DifficultyMeter",
 			InitCommand=function(self) self:horizalign(right):diffuse(Color.Black):zoom(0.215):xy(18,-2):queuecommand("Reset") end,
 			ResetCommand=function(self)

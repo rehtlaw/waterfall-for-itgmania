@@ -42,10 +42,10 @@ return Def.ActorFrame{
 	},
 
 	Def.BitmapText{
-		Font="raxye/_raxye main",
+		Font="raxye/_main",
 		Text=THEME:GetString("ScreenProfileLoad","Loading Profiles..."),
 		InitCommand=function(self)
-			self:diffuse( Color.Black ):zoom(0.6)
+			self:diffuse( Color.Black ):zoom(0.4):y(-5)
 		end
 	},
 

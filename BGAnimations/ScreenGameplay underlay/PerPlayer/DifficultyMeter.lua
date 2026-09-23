@@ -24,7 +24,7 @@ return Def.ActorFrame{
 	},
 
 	-- player's chart's difficulty meter
-	LoadFont("raxye/_raxye numbers")..{
+	LoadFont("raxye/_numbers")..{
 		InitCommand=function(self)
 			self:diffuse( Color.Black )
 			self:zoom( 0.18 )

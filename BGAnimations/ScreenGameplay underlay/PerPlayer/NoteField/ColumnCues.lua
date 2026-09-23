@@ -28,7 +28,7 @@ local text = nil
 -- else
 -- 	font = "_Combo Fonts/" .. font .. "/"
 -- end
-local font = "raxye/_raxye numbers"
+local font = "raxye/_numbers"
 
 local Update = function(self, delta)
 	if curIndex <= #columnCues then

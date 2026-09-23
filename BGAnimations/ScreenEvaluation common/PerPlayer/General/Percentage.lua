@@ -75,7 +75,7 @@ local t = Def.ActorFrame{
 
 	-- Only WF percent
 	Def.ActorFrame {
-		LoadFont("raxye/_raxye numbers")..{
+		LoadFont("raxye/_numbers")..{
 			Name="Percent",
 			Text=percent,
 			InitCommand=function(self)
@@ -152,7 +152,7 @@ local t = Def.ActorFrame{
 if displayExScore then
 	t[#t+1] = Def.ActorFrame {
 		-- smaller EX score
-		LoadFont("raxye/_raxye numbers")..{
+		LoadFont("raxye/_numbers")..{
 			Name="Percent",
 			Text=expercent,
 			InitCommand=function(self)
@@ -168,13 +168,13 @@ if displayExScore then
 	}
 	t[#t+1] = Def.ActorFrame {
 		-- EX label
-		LoadFont("raxye/_raxye main")..{
+		LoadFont("raxye/_main")..{
 			Name="PercentLabel",
 			Text="EX",
 			InitCommand=function(self)
-				self:zoom(0.5):horizalign(right)
+				self:zoom(0.25):horizalign(right)
 				self:x( (side == PLAYER_1 and -113) or 30)
-				self:y(26)
+				self:y(23)
 				self:diffuse(SL.JudgmentColors.ITG[1])
 			end,
 			SendEventDataMessageCommand=function(self)

@@ -52,7 +52,7 @@ local pss = STATSMAN:GetCurStageStats():GetPlayerStageStats(player)
 local af = Def.ActorFrame{
 	Name=pn.."Score",
 	-- ITG score
-	LoadFont("raxye/_raxye numbers")..{
+	LoadFont("raxye/_numbers")..{
 		--Name=pn.."Score",
 		InitCommand=function(self)
 			self:valign(1):halign(1)
@@ -100,7 +100,7 @@ local af = Def.ActorFrame{
 		end
 	},
 	-- EX Percent
-	LoadFont("raxye/_raxye numbers")..{
+	LoadFont("raxye/_numbers")..{
 		--Name=pn.."EXScore",
 		InitCommand=function(self)
 			if not displayExScore then return end 

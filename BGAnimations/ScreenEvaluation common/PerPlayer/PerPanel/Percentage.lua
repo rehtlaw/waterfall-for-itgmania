@@ -26,7 +26,7 @@ return Def.ActorFrame{
 		end
 	},
 
-	LoadFont("raxye/_raxye numbers")..{
+	LoadFont("raxye/_numbers")..{
 		Text=percent,
 		Name="Percent",
 		InitCommand=function(self) self:horizalign(right):zoom(0.175):xy( 30, -10) end,

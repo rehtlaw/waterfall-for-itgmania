@@ -61,7 +61,7 @@ local af = Def.ActorFrame{
 	},
 
 	-- numerical difficulty meter
-	LoadFont("raxye/_raxye numbers")..{
+	LoadFont("raxye/_numbers")..{
 		InitCommand=function(self)
 			self:diffuse(Color.Black):zoom( 0.24 )
 			self:y( _screen.cy-50 )

@@ -29,9 +29,9 @@ local af = Def.ActorFrame{
             end
         },
     
-        LoadFont("raxye/_raxye main")..{
+        LoadFont("raxye/_main")..{
             Text="FA+",
-            InitCommand=function(self) self:horizalign("center"):zoom(0.65):xy( 0, -4) end,
+            InitCommand=function(self) self:horizalign("center"):zoom(0.325):xy( 0, -6) end,
         }
     },
 
@@ -67,26 +67,26 @@ local af = Def.ActorFrame{
             InitCommand = function(self) self:xy(52, 58):horizalign("right"):zoom(0.833) end
         },
         -- count numbers
-        LoadFont("raxye/_raxye numbers")..{
+        LoadFont("raxye/_numbers")..{
             Text = tostring(WF.FAPlusCount[pn][1]),
             InitCommand = function(self)
                 self:xy(132, 24):horizalign("right"):zoom(0.2)
             end
         },
-        LoadFont("raxye/_raxye numbers")..{
+        LoadFont("raxye/_numbers")..{
             Text = tostring(perfects),
             InitCommand = function(self)
                 self:xy(132, 52):horizalign("right"):zoom(0.2)
             end
         },
         -- percents
-        LoadFont("raxye/_raxye numbers")..{
+        LoadFont("raxye/_numbers")..{
             Text = percent1,
             InitCommand = function(self)
                 self:xy(226, 24):horizalign("right"):zoom(0.2)
             end
         },
-        LoadFont("raxye/_raxye numbers")..{
+        LoadFont("raxye/_numbers")..{
             Text = percent3,
             InitCommand = function(self)
                 self:xy(226, 52):horizalign("right"):zoom(0.2)
@@ -97,7 +97,7 @@ local af = Def.ActorFrame{
             Text = "Total Steps",
             InitCommand = function(self) self:xy(120, 106):horizalign("right"):zoom(0.833) end
         },
-        LoadFont("raxye/_raxye numbers")..{
+        LoadFont("raxye/_numbers")..{
             Text = tostring(notes),
             InitCommand = function(self)
                 self:xy(226, 100):horizalign("right"):zoom(0.2)

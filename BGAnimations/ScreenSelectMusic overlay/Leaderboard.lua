@@ -381,23 +381,23 @@ for player in ivalues( PlayerNumber ) do
 		},
 
 		-- Header Text
-		LoadFont("Wendy/_wendy small").. {
+		LoadFont("raxye/_main").. {
 			Name="Header",
-			Text="GrooveStats",
+			Text="GROOVESTATS",
 			InitCommand=function(self)
-				self:zoom(0.5)
-				self:y(-paneHeight/2 + 12)
+				self:zoom(0.3)
+				self:y(-paneHeight/2 + 8)
 			end
 		},
 
 		-- EX Text
-		LoadFont("Wendy/_wendy small").. {
+		LoadFont("raxye/_main").. {
 			Name="EX",
 			Text="EX",
 			InitCommand=function(self)
-				self:zoom(0.5)
-				self:y(-paneHeight/2 + 12)
-				self:x(paneWidth/2 - 16)
+				self:zoom(0.3)
+				self:y(-paneHeight/2 + 8)
+				self:x(paneWidth/2 + 25)
 				self:visible(false)
 			end
 		},

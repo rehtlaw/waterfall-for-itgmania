@@ -36,7 +36,7 @@ af[#af+1] = LoadActor( THEME:GetPathG("", "_header.lua") )
 -- session timer in EventMode
 if PREFSMAN:GetPreference("EventMode") then
 
-	af[#af+1] = LoadFont("raxye/_raxye numbers")..{
+	af[#af+1] = LoadFont("raxye/_numbers")..{
 		Name="Session Timer",
 		InitCommand=function(self)
 			bmt_actor = self
@@ -66,11 +66,11 @@ else
 end
 
 -- some text aligned to right of screen
-af[#af+1] = LoadFont("raxye/_raxye main")..{
+af[#af+1] = LoadFont("raxye/_main")..{
 	Name="RightSideText",
 	Text=GAMESTATE:IsCourseMode() and "MARATHON" or "STANDARD",
 	InitCommand=function(self)
-		self:diffusealpha(0):zoom( WideScale(0.5,0.6)):halign(1):y(15)
+		self:diffusealpha(0):zoom( WideScale(0.25,0.3)):halign(1):y(13)
 
 		-- move the text further left if MenuTimer is enabled
 		if PREFSMAN:GetPreference("MenuTimer") then

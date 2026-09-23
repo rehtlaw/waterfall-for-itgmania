@@ -81,9 +81,9 @@ local af = Def.ActorFrame{
             end
         },
     
-        LoadFont("raxye/_raxye main")..{
+        LoadFont("raxye/_main")..{
             Text="ACHIEVEMENTS",
-            InitCommand=function(self) self:horizalign("center"):zoom(0.6):xy( 0, -2) end,
+            InitCommand=function(self) self:horizalign("center"):zoom(0.3):xy( 0, -6) end,
         }
     },
 
@@ -92,11 +92,11 @@ local af = Def.ActorFrame{
         Text = "Standard",
         InitCommand = function(self) self:xy(-140, 22):horizalign("left") end
     },
-    LoadFont("raxye/_raxye numbers")..{
+    LoadFont("raxye/_numbers")..{
         Text = oldscorestr,
         InitCommand = function(self) self:xy(-86, 35):horizalign("right"):diffuse(0.8,0.8,0.8,1):zoom(0.14) end
     },
-    LoadFont("raxye/_raxye numbers")..{
+    LoadFont("raxye/_numbers")..{
         Text = scorestr,
         InitCommand = function(self) self:xy(-70, 35):horizalign("left"):zoom(0.14) end
     },
@@ -107,11 +107,11 @@ local af = Def.ActorFrame{
         Text = "ITG",
         InitCommand = function(self) self:xy(10, 22):horizalign("left") end
     },
-    LoadFont("raxye/_raxye numbers")..{
+    LoadFont("raxye/_numbers")..{
         Text = oldscorestr_itg,
         InitCommand = function(self) self:xy(150-86, 35):horizalign("right"):diffuse(0.8,0.8,0.8,1):zoom(0.14) end
     },
-    LoadFont("raxye/_raxye numbers")..{
+    LoadFont("raxye/_numbers")..{
         Text = scorestr_itg,
         InitCommand = function(self) self:xy(150-70, 35):horizalign("left"):zoom(0.14) end
     },
@@ -169,12 +169,12 @@ for i = 1, 2 do
         Text = l[i],
         InitCommand = function(self) self:xy(-100, 122 + (i-1)*15):horizalign("right"):zoom(0.75) end
     }
-    af[#af+1] = LoadFont("raxye/_raxye numbers")..{
+    af[#af+1] = LoadFont("raxye/_numbers")..{
         Text = tostring(oldfaplus[j]),
         InitCommand = function(self) self:xy(-40, 117 + (i-1)*15):horizalign("right"):zoom(0.12)
             :diffusealpha(0.75) end
     }
-    af[#af+1] = LoadFont("raxye/_raxye numbers")..{
+    af[#af+1] = LoadFont("raxye/_numbers")..{
         Text = tostring(faplus[j]),
         InitCommand = function(self) self:xy(32, 117 + (i-1)*15):horizalign("right"):zoom(0.12) end
     }
