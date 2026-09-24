@@ -114,7 +114,7 @@ af[#af+1] = Def.ActorFrame{
 af[#af+1] = Def.Quad{
 	InitCommand = function(self)
 		if IsArcade() then self:visible(false) end
-		self:y(_screen.h/3.8):zoomto(180, 120):diffuse(0,0,0,0.8)
+		self:x(-226):y(_screen.h/4.25):zoomto(355, 180):diffuse(0,0,0,0.8)
 	end
 }
 
